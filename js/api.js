@@ -57,6 +57,11 @@ const API = {
             if (response.status === 204) return true;
             return await response.json();
         } catch (err) {
+            const message = err?.message || "";
+            const isNetworkError = message === "Failed to fetch" || message === "NetworkError when attempting to fetch resource." || err instanceof TypeError;
+            if (isNetworkError) {
+                err = new Error("Unable to connect to the backend API at http://localhost:8000. Please start the FastAPI backend and reload the page.");
+            }
             console.warn(`[API] Endpoint '${endpoint}' request failed. Using fallback if available.`, err.message);
             if (localStorageFallbackFn) {
                 return localStorageFallbackFn();
@@ -71,24 +76,33 @@ const API = {
         formData.append("username", email);
         formData.append("password", password);
 
-        const response = await fetch(`${API_BASE_URL}/auth/login`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
-            },
-            body: formData
-        });
+        try {
+            const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: formData
+            });
 
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.detail || "Invalid Email Address or Password");
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.detail || "Invalid Email Address or Password");
+            }
+
+            const data = await response.json();
+            this.setToken(data.access_token);
+            localStorage.setItem("isLoggedIn", "true");
+            localStorage.setItem("adminName", data.user.full_name || "Santhosh Kumar");
+            return data;
+        } catch (err) {
+            const message = err?.message || "";
+            const isNetworkError = message === "Failed to fetch" || message === "NetworkError when attempting to fetch resource." || err instanceof TypeError;
+            if (isNetworkError) {
+                throw new Error("Unable to connect to the backend API at http://localhost:8000. Please start the FastAPI backend and reload the page.");
+            }
+            throw err;
         }
-
-        const data = await response.json();
-        this.setToken(data.access_token);
-        localStorage.setItem("isLoggedIn", "true");
-        localStorage.setItem("adminName", data.user.full_name || "Santhosh Kumar");
-        return data;
     },
 
     // 2. DASHBOARD

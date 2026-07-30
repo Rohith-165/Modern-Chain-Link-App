@@ -1,0 +1,58 @@
+/* ==========================================
+   MODERN CHAIN LINK COMPANY - ORDERS CSS
+========================================== */
+
+.pageHeader {
+    padding: 24px;
+    background: linear-gradient(135deg, #0b8f47 0%, #06602f 100%);
+    color: #ffffff;
+    border-bottom-left-radius: 24px;
+    border-bottom-right-radius: 24px;
+    box-shadow: 0 8px 20px rgba(11, 143, 71, 0.25);
+}
+
+.controlsSection {
+    padding: 0 20px;
+}
+
+.searchContainer, .filterContainer {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.searchIcon, .filterIcon {
+    position: absolute;
+    left: 14px;
+    color: var(--text-muted);
+    font-size: 16px;
+    pointer-events: none;
+}
+
+.searchInput, .statusFilter {
+    padding-left: 42px !important;
+}
+
+.summarySection, .ordersSection {
+    padding: 0 20px;
+}
+
+.ordersGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+@media (min-width: 768px) {
+    .ordersGrid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .ordersGrid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}

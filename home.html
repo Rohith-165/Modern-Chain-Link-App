@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home | Modern Chain Link Company</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/home.css">
+    <link rel="stylesheet" href="css/navigation.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- Header -->
+    <header class="homeHeader flexBetween">
+        <div>
+            <p id="greeting" class="welcomeLabel"><i class="fa-solid fa-sun color-primary"></i> Welcome,</p>
+            <h2 id="adminName">Admin</h2>
+            <p id="currentDate" class="currentDate">--</p>
+        </div>
+        <img src="assets/images/logo.png" alt="Company Logo" class="headerLogo">
+    </header>
+
+    <!-- Dashboard Stat Cards -->
+    <section class="dashboardSection mt20">
+        <div class="grid-responsive-4">
+            <div class="dashboardCard app-card">
+                <div class="cardHeader flexBetween">
+                    <p>Total Orders</p>
+                    <i class="fa-solid fa-boxes-stacked color-primary cardIcon"></i>
+                </div>
+                <h2 id="totalOrders">0</h2>
+            </div>
+
+            <div class="dashboardCard app-card">
+                <div class="cardHeader flexBetween">
+                    <p>Pending Orders</p>
+                    <i class="fa-solid fa-clock color-secondary cardIcon"></i>
+                </div>
+                <h2 id="pendingOrders">0</h2>
+            </div>
+
+            <div class="dashboardCard app-card">
+                <div class="cardHeader flexBetween">
+                    <p>Total Revenue</p>
+                    <i class="fa-solid fa-indian-rupee-sign color-primary cardIcon"></i>
+                </div>
+                <h2 id="totalRevenue">₹0</h2>
+            </div>
+
+            <div class="dashboardCard app-card">
+                <div class="cardHeader flexBetween">
+                    <p>Outstanding Balance</p>
+                    <i class="fa-solid fa-wallet color-danger cardIcon"></i>
+                </div>
+                <h2 id="totalBalance">₹0</h2>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Actions -->
+    <section class="quickActions mt30">
+        <h3><i class="fa-solid fa-bolt color-primary"></i> Quick Actions</h3>
+        <div class="actionGrid mt10">
+            <button class="actionButton" onclick="location.href='add-order.html'">
+                <i class="fa-solid fa-plus-circle actionIcon"></i>
+                <span>Add Order</span>
+            </button>
+
+            <button class="actionButton" onclick="location.href='orders.html'">
+                <i class="fa-solid fa-list-check actionIcon"></i>
+                <span>View Orders</span>
+            </button>
+
+            <button class="actionButton" onclick="location.href='customers.html'">
+                <i class="fa-solid fa-users actionIcon"></i>
+                <span>Customers</span>
+            </button>
+
+            <button class="actionButton" onclick="location.href='profile.html'">
+                <i class="fa-solid fa-user-gear actionIcon"></i>
+                <span>Profile</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- Recent Orders -->
+    <section class="recentOrders mt30">
+        <div class="sectionTitle flexBetween mb10">
+            <h3><i class="fa-solid fa-clock-rotate-left color-primary"></i> Recent Orders</h3>
+            <a href="orders.html" class="btn-outline btn-sm">View All <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+
+        <div id="recentOrdersContainer" class="recentOrdersContainer">
+            <div class="emptyCard textCenter">
+                <i class="fa-solid fa-inbox color-primary emptyIcon"></i>
+                <p>No Orders Available</p>
+            </div>
+        </div>
+    </section>
+
+</div>
+
+<!-- Floating Add Button -->
+<button class="fabButton" onclick="location.href='add-order.html'" title="Add New Order">
+    <i class="fa-solid fa-plus"></i>
+</button>
+
+<!-- Bottom Navigation -->
+<nav class="bottomNavigation">
+    <a href="home.html" class="navItem active">
+        <i class="fa-solid fa-house"></i>
+        <small>Home</small>
+    </a>
+    <a href="orders.html" class="navItem">
+        <i class="fa-solid fa-list-check"></i>
+        <small>Orders</small>
+    </a>
+    <a href="customers.html" class="navItem">
+        <i class="fa-solid fa-users"></i>
+        <small>Customers</small>
+    </a>
+    <a href="profile.html" class="navItem">
+        <i class="fa-solid fa-user"></i>
+        <small>Profile</small>
+    </a>
+</nav>
+
+<script src="js/ui.js"></script>
+<script src="js/api.js"></script>
+<script src="js/navigation.js"></script>
+<script src="js/home.js"></script>
+
+</body>
+
+</html>

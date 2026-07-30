@@ -1,0 +1,81 @@
+/* ==========================================
+   MODERN CHAIN LINK COMPANY - NAVIGATION
+========================================== */
+
+.bottomNavigation {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 70px;
+    background: var(--bg-surface, #ffffff);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-top: 1px solid var(--border-color, #e5e7eb);
+    box-shadow: var(--shadow-lg, 0 -4px 12px rgba(0,0,0,0.08));
+    z-index: 999;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.navItem {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    color: var(--text-muted, #777777);
+    transition: var(--transition, all 0.25s ease);
+    height: 100%;
+    position: relative;
+}
+
+.navItem i {
+    font-size: 20px;
+    margin-bottom: 4px;
+    transition: transform 0.2s ease;
+}
+
+.navItem small {
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.navItem.active {
+    color: var(--primary-color, #0b8f47);
+    font-weight: 600;
+}
+
+.navItem.active i {
+    transform: translateY(-2px);
+    color: var(--primary-color, #0b8f47);
+}
+
+.navItem:hover {
+    color: var(--primary-color, #0b8f47);
+    background: var(--primary-light, #f5fff8);
+}
+
+.navItem.active::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    width: 40px;
+    height: 4px;
+    background: var(--primary-color, #0b8f47);
+    border-radius: 0 0 8px 8px;
+}
+
+/* Tablet & Desktop Centered Bar */
+@media (min-width: 768px) {
+    .bottomNavigation {
+        max-width: 600px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-radius: 18px 18px 0 0;
+        border: 1px solid var(--border-color, #e5e7eb);
+        border-bottom: none;
+    }
+}

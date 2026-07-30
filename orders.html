@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders | Modern Chain Link Company</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/orders.css">
+    <link rel="stylesheet" href="css/navigation.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- Header -->
+    <header class="pageHeader flexBetween">
+        <div>
+            <h1><i class="fa-solid fa-list-check"></i> Manage Orders</h1>
+            <p>View, search, and filter customer fencing orders</p>
+        </div>
+        <button onclick="location.href='add-order.html'" class="btn-outline btn-sm" style="color:white; border-color:white;">
+            <i class="fa-solid fa-plus"></i> New Order
+        </button>
+    </header>
+
+    <!-- Controls Section (Search & Filter) -->
+    <section class="controlsSection mt20">
+        <div class="grid-responsive-2">
+            <div class="searchContainer">
+                <i class="fa-solid fa-magnifying-glass searchIcon"></i>
+                <input type="text" id="searchInput" placeholder="Search by Order ID, Customer Name, or Phone..." class="searchInput">
+            </div>
+
+            <div class="filterContainer">
+                <i class="fa-solid fa-filter filterIcon"></i>
+                <select id="statusFilter" class="statusFilter">
+                    <option value="All">All Statuses</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Processing">Processing</option>
+                    <option value="Delivered">Delivered</option>
+                </select>
+            </div>
+        </div>
+    </section>
+
+    <!-- Order Summary Cards -->
+    <section class="summarySection mt20">
+        <div class="grid2">
+            <div class="summaryCard app-card textCenter">
+                <p><i class="fa-solid fa-layer-group color-primary"></i> Total Orders</p>
+                <h2 id="totalOrderCount">0</h2>
+            </div>
+
+            <div class="summaryCard app-card textCenter">
+                <p><i class="fa-solid fa-filter-circle-dollar color-secondary"></i> Showing</p>
+                <h2 id="filteredOrderCount">0</h2>
+            </div>
+        </div>
+    </section>
+
+    <!-- Orders List Container -->
+    <section class="ordersSection mt20">
+        <div id="ordersContainer" class="ordersGrid">
+            <div class="emptyCard textCenter app-card">
+                <i class="fa-solid fa-inbox color-primary emptyIcon"></i>
+                <p>No Orders Found</p>
+            </div>
+        </div>
+    </section>
+
+</div>
+
+<!-- Floating Add Button -->
+<button class="fabButton" onclick="location.href='add-order.html'" title="Add New Order">
+    <i class="fa-solid fa-plus"></i>
+</button>
+
+<!-- Bottom Navigation -->
+<nav class="bottomNavigation">
+    <a href="home.html" class="navItem">
+        <i class="fa-solid fa-house"></i>
+        <small>Home</small>
+    </a>
+    <a href="orders.html" class="navItem active">
+        <i class="fa-solid fa-list-check"></i>
+        <small>Orders</small>
+    </a>
+    <a href="customers.html" class="navItem">
+        <i class="fa-solid fa-users"></i>
+        <small>Customers</small>
+    </a>
+    <a href="profile.html" class="navItem">
+        <i class="fa-solid fa-user"></i>
+        <small>Profile</small>
+    </a>
+</nav>
+
+<script src="js/ui.js"></script>
+<script src="js/api.js"></script>
+<script src="js/navigation.js"></script>
+<script src="js/orders.js"></script>
+
+</body>
+
+</html>

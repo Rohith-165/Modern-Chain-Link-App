@@ -1,0 +1,291 @@
+/* ==========================================
+   ADD ORDER PAGE
+========================================== */
+
+body{
+
+    background:#f5f7fa;
+    padding-bottom:30px;
+
+}
+
+/* ==========================================
+   HEADER
+========================================== */
+
+.pageHeader{
+
+    background:#0b8f47;
+
+    color:#ffffff;
+
+    padding:25px 20px;
+
+    border-bottom-left-radius:20px;
+    border-bottom-right-radius:20px;
+
+    box-shadow:0 4px 12px rgba(0,0,0,.15);
+
+}
+
+.pageHeader h1{
+
+    font-size:28px;
+
+    font-weight:700;
+
+    margin-bottom:6px;
+
+}
+
+.pageHeader p{
+
+    font-size:14px;
+
+    opacity:.9;
+
+}
+
+/* ==========================================
+   FORM
+========================================== */
+
+#orderForm{
+
+    padding:20px;
+
+}
+
+/* ==========================================
+   CARD
+========================================== */
+
+.formCard{
+
+    background:#ffffff;
+
+    border-radius:18px;
+
+    padding:20px;
+
+    margin-bottom:20px;
+
+    box-shadow:0 4px 12px rgba(0,0,0,.08);
+
+}
+
+.formCard h2{
+
+    color:#0b8f47;
+
+    font-size:20px;
+
+    margin-bottom:20px;
+
+    padding-bottom:10px;
+
+    border-bottom:2px solid #f1f1f1;
+
+}
+
+/* ==========================================
+   LABEL
+========================================== */
+
+.formCard label{
+
+    display:block;
+
+    margin-top:16px;
+
+    margin-bottom:8px;
+
+    font-size:14px;
+
+    font-weight:600;
+
+    color:#444444;
+
+}
+
+/* ==========================================
+   INPUTS
+========================================== */
+
+.formCard input,
+.formCard select,
+.formCard textarea{
+
+    width:100%;
+
+    padding:13px;
+
+    border:1px solid #d9d9d9;
+
+    border-radius:12px;
+
+    font-size:15px;
+
+    background:#ffffff;
+
+    transition:.3s;
+
+    outline:none;
+
+    font-family:"Poppins",sans-serif;
+
+}
+
+.formCard textarea{
+
+    resize:vertical;
+
+}
+
+.formCard input:focus,
+.formCard select:focus,
+.formCard textarea:focus{
+
+    border-color:#0b8f47;
+
+    box-shadow:0 0 0 3px rgba(11,143,71,.15);
+
+}
+
+/* ==========================================
+   INSTALLATION SECTION
+========================================== */
+
+#installationFields{
+
+    margin-top:15px;
+
+}
+
+/* ==========================================
+   CALCULATION
+========================================== */
+
+.resultRow{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:14px 0;
+
+    border-bottom:1px solid #eeeeee;
+
+}
+
+.resultRow:last-child{
+
+    border-bottom:none;
+
+}
+
+.resultRow span{
+
+    color:#555555;
+
+    font-size:15px;
+
+}
+
+.resultRow strong{
+
+    color:#0b8f47;
+
+    font-size:17px;
+
+    font-weight:700;
+
+}
+
+/* ==========================================
+   SAVE BUTTON
+========================================== */
+
+.primaryBtn{
+
+    width:100%;
+
+    margin-top:10px;
+
+    margin-bottom:30px;
+
+    font-size:17px;
+
+    font-weight:600;
+
+    border-radius:14px;
+
+    padding:15px;
+
+    transition:.3s;
+
+}
+
+.primaryBtn:hover{
+
+    transform:translateY(-2px);
+
+}
+
+/* ==========================================
+   RESPONSIVE
+========================================== */
+
+@media(max-width:480px){
+
+    #orderForm{
+
+        padding:15px;
+
+    }
+
+    .pageHeader{
+
+        padding:20px;
+
+    }
+
+    .pageHeader h1{
+
+        font-size:24px;
+
+    }
+
+    .formCard{
+
+        padding:16px;
+
+        border-radius:15px;
+
+    }
+
+    .formCard h2{
+
+        font-size:18px;
+
+    }
+
+    .resultRow{
+
+        flex-direction:column;
+
+        align-items:flex-start;
+
+        gap:6px;
+
+    }
+
+    .primaryBtn{
+
+        font-size:16px;
+
+    }
+
+}

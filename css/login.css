@@ -1,0 +1,259 @@
+/* ==========================================
+   LOGIN PAGE
+========================================== */
+
+.loginContainer{
+
+    min-height:100vh;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+
+    padding:25px;
+
+    background:linear-gradient(135deg,#f8fff9,#ffffff);
+
+}
+
+/* ==========================================
+   LOGO
+========================================== */
+
+.logo{
+
+    width:120px;
+    height:120px;
+
+    object-fit:contain;
+
+    margin-bottom:20px;
+
+}
+
+/* ==========================================
+   TITLE
+========================================== */
+
+.loginContainer h1{
+
+    color:#0b8f47;
+
+    font-size:28px;
+
+    font-weight:700;
+
+    text-align:center;
+
+    margin-bottom:10px;
+
+}
+
+/* ==========================================
+   WELCOME TEXT
+========================================== */
+
+.welcomeText{
+
+    color:#666;
+
+    font-size:16px;
+
+    margin-bottom:30px;
+
+}
+
+/* ==========================================
+   LOGIN CARD
+========================================== */
+
+.loginCard{
+
+    width:100%;
+    max-width:380px;
+
+    background:#ffffff;
+
+    padding:25px;
+
+    border-radius:18px;
+
+    box-shadow:0 8px 20px rgba(0,0,0,.08);
+
+}
+
+/* ==========================================
+   CARD TITLE
+========================================== */
+
+.loginCard h2{
+
+    text-align:center;
+
+    color:#0b8f47;
+
+    margin-bottom:25px;
+
+}
+
+/* ==========================================
+   LABEL
+========================================== */
+
+.loginCard label{
+
+    display:block;
+
+    margin-bottom:8px;
+
+    margin-top:15px;
+
+    font-size:14px;
+
+    font-weight:500;
+
+}
+
+/* ==========================================
+   INPUT
+========================================== */
+
+.loginCard input{
+
+    width:100%;
+
+    padding:13px;
+
+    border:1px solid #ddd;
+
+    border-radius:10px;
+
+    font-size:15px;
+
+}
+
+/* ==========================================
+   PASSWORD
+========================================== */
+
+.passwordContainer{
+
+    position:relative;
+
+}
+
+.passwordContainer input{
+
+    padding-right:55px;
+
+}
+
+#togglePassword{
+
+    position:absolute;
+
+    right:12px;
+
+    top:50%;
+
+    transform:translateY(-50%);
+
+    background:none;
+
+    border:none;
+
+    cursor:pointer;
+
+    font-size:18px;
+
+}
+
+/* ==========================================
+   LOGIN BUTTON
+========================================== */
+
+#loginBtn{
+
+    margin-top:25px;
+
+}
+
+/* ==========================================
+   ERROR MESSAGE
+========================================== */
+
+.errorMessage{
+
+    color:#d32f2f;
+
+    font-size:14px;
+
+    margin-top:15px;
+
+    min-height:20px;
+
+    text-align:center;
+
+}
+
+/* ==========================================
+   FOOTER
+========================================== */
+
+.footerText{
+
+    margin-top:30px;
+
+    color:#888;
+
+    font-size:13px;
+
+    text-align:center;
+
+}
+
+/* ==========================================
+   HOVER
+========================================== */
+
+#loginBtn:hover{
+
+    transform:translateY(-2px);
+
+    transition:.3s;
+
+}
+
+/* ==========================================
+   MOBILE
+========================================== */
+
+@media(max-width:480px){
+
+.loginContainer{
+
+    padding:20px;
+
+}
+
+.logo{
+
+    width:100px;
+    height:100px;
+
+}
+
+.loginContainer h1{
+
+    font-size:24px;
+
+}
+
+.loginCard{
+
+    padding:20px;
+
+}
+
+}

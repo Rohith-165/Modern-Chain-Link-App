@@ -1,0 +1,179 @@
+/* ==========================================
+   SPLASH SCREEN
+========================================== */
+
+.splashContainer{
+
+    width:100%;
+    min-height:100vh;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+
+    background:linear-gradient(135deg,#0b8f47,#06753b);
+
+    color:#ffffff;
+
+    padding:30px;
+
+}
+
+/* ==========================================
+   LOGO
+========================================== */
+
+.logo{
+
+    width:140px;
+    height:140px;
+
+    object-fit:contain;
+
+    margin-bottom:25px;
+
+    animation:logoAnimation 1.2s ease;
+
+}
+
+/* ==========================================
+   TITLE
+========================================== */
+
+.splashContainer h1{
+
+    font-size:30px;
+    font-weight:700;
+
+    text-align:center;
+
+    margin-bottom:10px;
+
+}
+
+/* ==========================================
+   TAGLINE
+========================================== */
+
+.tagline{
+
+    font-size:16px;
+
+    opacity:0.9;
+
+    margin-bottom:40px;
+
+    text-align:center;
+
+}
+
+/* ==========================================
+   LOADER
+========================================== */
+
+.loader{
+
+    width:220px;
+    height:8px;
+
+    background:rgba(255,255,255,0.25);
+
+    border-radius:20px;
+
+    overflow:hidden;
+
+}
+
+/* ==========================================
+   LOADER BAR
+========================================== */
+
+.loaderBar{
+
+    width:0%;
+
+    height:100%;
+
+    background:#ffffff;
+
+    border-radius:20px;
+
+    animation:loading 2.5s linear forwards;
+
+}
+
+/* ==========================================
+   LOGO ANIMATION
+========================================== */
+
+@keyframes logoAnimation{
+
+    from{
+
+        opacity:0;
+        transform:scale(0.5);
+
+    }
+
+    to{
+
+        opacity:1;
+        transform:scale(1);
+
+    }
+
+}
+
+/* ==========================================
+   LOADER ANIMATION
+========================================== */
+
+@keyframes loading{
+
+    from{
+
+        width:0%;
+
+    }
+
+    to{
+
+        width:100%;
+
+    }
+
+}
+
+/* ==========================================
+   MOBILE
+========================================== */
+
+@media(max-width:480px){
+
+    .logo{
+
+        width:120px;
+        height:120px;
+
+    }
+
+    .splashContainer h1{
+
+        font-size:24px;
+
+    }
+
+    .tagline{
+
+        font-size:14px;
+
+    }
+
+    .loader{
+
+        width:180px;
+
+    }
+
+}

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customers | Modern Chain Link Company</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/customers.css">
+    <link rel="stylesheet" href="css/navigation.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- Header -->
+    <header class="pageHeader flexBetween">
+        <div>
+            <h1><i class="fa-solid fa-users"></i> Customer History</h1>
+            <p>Track customer profiles, lifetime value, and order records</p>
+        </div>
+        <button onclick="location.href='add-order.html'" class="btn-outline btn-sm" style="color:white; border-color:white;">
+            <i class="fa-solid fa-user-plus"></i> New Order
+        </button>
+    </header>
+
+    <!-- Search Section -->
+    <section class="controlsSection mt20">
+        <div class="searchContainer">
+            <i class="fa-solid fa-magnifying-glass searchIcon"></i>
+            <input type="text" id="customerSearchInput" placeholder="Search by Customer Name or Phone Number..." class="searchInput">
+        </div>
+    </section>
+
+    <!-- Customer Statistics Overview -->
+    <section class="summarySection mt20">
+        <div class="grid-responsive-3">
+            <div class="summaryCard app-card textCenter">
+                <p><i class="fa-solid fa-user-group color-primary"></i> Total Customers</p>
+                <h2 id="totalCustomersCount">0</h2>
+            </div>
+            <div class="summaryCard app-card textCenter">
+                <p><i class="fa-solid fa-indian-rupee-sign color-primary"></i> Total Value</p>
+                <h2 id="totalCustomerRevenue">₹0</h2>
+            </div>
+            <div class="summaryCard app-card textCenter">
+                <p><i class="fa-solid fa-wallet color-danger"></i> Outstanding Balances</p>
+                <h2 id="totalCustomerBalance">₹0</h2>
+            </div>
+        </div>
+    </section>
+
+    <!-- Customers Directory -->
+    <section class="customersSection mt20">
+        <div id="customersContainer" class="customersGrid">
+            <div class="emptyCard textCenter app-card">
+                <i class="fa-solid fa-users-slash color-primary emptyIcon" style="font-size: 40px; margin-bottom: 10px;"></i>
+                <p>No Customers Found</p>
+            </div>
+        </div>
+    </section>
+
+</div>
+
+<!-- Floating Add Button -->
+<button class="fabButton" onclick="location.href='add-order.html'" title="Add New Order">
+    <i class="fa-solid fa-plus"></i>
+</button>
+
+<!-- Bottom Navigation -->
+<nav class="bottomNavigation">
+    <a href="home.html" class="navItem">
+        <i class="fa-solid fa-house"></i>
+        <small>Home</small>
+    </a>
+    <a href="orders.html" class="navItem">
+        <i class="fa-solid fa-list-check"></i>
+        <small>Orders</small>
+    </a>
+    <a href="customers.html" class="navItem active">
+        <i class="fa-solid fa-users"></i>
+        <small>Customers</small>
+    </a>
+    <a href="profile.html" class="navItem">
+        <i class="fa-solid fa-user"></i>
+        <small>Profile</small>
+    </a>
+</nav>
+
+<script src="js/ui.js"></script>
+<script src="js/api.js"></script>
+<script src="js/navigation.js"></script>
+<script src="js/customers.js"></script>
+
+</body>
+
+</html>

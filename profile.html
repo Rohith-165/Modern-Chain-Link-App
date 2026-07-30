@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile | Modern Chain Link Company</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/profile.css">
+    <link rel="stylesheet" href="css/navigation.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- Header -->
+    <header class="profileHeader flexBetween">
+        <div>
+            <h1><i class="fa-solid fa-user-shield"></i> Profile & Settings</h1>
+            <p>Admin workspace & application options</p>
+        </div>
+        <img src="assets/images/logo.png" alt="Company Logo" class="profileLogo">
+    </header>
+
+    <div class="grid-responsive-2 mt20" style="padding: 0 20px;">
+
+        <!-- Profile Info Card -->
+        <section class="profileCard app-card textCenter">
+            <div class="profileAvatar">
+                <i class="fa-solid fa-user-gear color-primary"></i>
+            </div>
+            <h2 id="adminName" class="mt10">Administrator</h2>
+            <p id="adminEmail" class="text-muted"><i class="fa-solid fa-envelope"></i> Kumar@modernchainlink.com</p>
+            <span class="badge badge-paid mt10"><i class="fa-solid fa-shield"></i> Verified System Admin</span>
+        </section>
+
+        <!-- Company Information -->
+        <section class="infoCard app-card">
+            <h3><i class="fa-solid fa-building color-primary"></i> Company Details</h3>
+
+            <div class="infoRow flexBetween mt10">
+                <span>Business Name</span>
+                <strong id="companyName">Modern Chain Link Company</strong>
+            </div>
+
+            <div class="infoRow flexBetween mt10">
+                <span>GST Number</span>
+                <strong id="companyGst">33AAAAA0000A1Z5</strong>
+            </div>
+
+            <div class="infoRow flexBetween mt10">
+                <span>Location</span>
+                <strong id="companyAddress">Tiruchengode, Tamil Nadu</strong>
+            </div>
+
+            <div class="infoRow flexBetween mt10">
+                <span>Application Version</span>
+                <strong id="companyVersion">v2.0.0 (FastAPI PWA)</strong>
+            </div>
+        </section>
+
+        <!-- Dashboard Summary Card -->
+        <section class="infoCard app-card">
+            <h3><i class="fa-solid fa-chart-line color-primary"></i> Activity Summary</h3>
+
+            <div class="grid2 mt10">
+                <div class="summaryBox textCenter p10" style="background: var(--bg-subtle); border-radius: var(--radius-md);">
+                    <h2 id="totalOrders" class="color-primary">0</h2>
+                    <p style="font-size: 13px;">Total Orders</p>
+                </div>
+
+                <div class="summaryBox textCenter p10" style="background: var(--bg-subtle); border-radius: var(--radius-md);">
+                    <h2 id="pendingOrders" style="color: var(--warning-color);">0</h2>
+                    <p style="font-size: 13px;">Pending Fulfillment</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Settings & Data Management Card -->
+        <section class="infoCard app-card">
+            <h3><i class="fa-solid fa-sliders color-primary"></i> System Tools & Data</h3>
+
+            <div class="menuList mt10">
+                <button class="menuButton btn-secondary mb10" onclick="exportData()">
+                    <i class="fa-solid fa-download color-primary"></i> Backup / Export Orders JSON
+                </button>
+
+                <button class="menuButton btn-secondary mb10" onclick="importData()">
+                    <i class="fa-solid fa-upload color-secondary"></i> Restore / Import Orders JSON
+                </button>
+
+                <button class="menuButton btn-danger logoutButton mt10" onclick="logout()">
+                    <i class="fa-solid fa-right-from-bracket"></i> Log Out
+                </button>
+            </div>
+        </section>
+
+    </div>
+
+</div>
+
+<!-- Bottom Navigation -->
+<nav class="bottomNavigation">
+    <a href="home.html" class="navItem">
+        <i class="fa-solid fa-house"></i>
+        <small>Home</small>
+    </a>
+    <a href="orders.html" class="navItem">
+        <i class="fa-solid fa-list-check"></i>
+        <small>Orders</small>
+    </a>
+    <a href="customers.html" class="navItem">
+        <i class="fa-solid fa-users"></i>
+        <small>Customers</small>
+    </a>
+    <a href="profile.html" class="navItem active">
+        <i class="fa-solid fa-user"></i>
+        <small>Profile</small>
+    </a>
+</nav>
+
+<script src="js/ui.js"></script>
+<script src="js/api.js"></script>
+<script src="js/navigation.js"></script>
+<script src="js/profile.js"></script>
+
+</body>
+
+</html>

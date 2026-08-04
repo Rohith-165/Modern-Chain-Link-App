@@ -4,7 +4,7 @@
    Includes JWT Auth, Error Handling & Offline LocalStorage Fallback
 ========================================== */
 
-const API_BASE_URL = "http://localhost:8000/api/v1";
+const API_BASE_URL = "https://mclc-backend.onrender.com/api/v1";
 
 const API = {
     getToken() {

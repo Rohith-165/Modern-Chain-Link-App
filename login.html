@@ -23,9 +23,46 @@
         <h1>Modern Chain Link Company</h1>
         <p class="welcomeText">Welcome Back!</p>
 
-        <!-- Login Card -->
-        <div class="loginCard app-card mt20">
-            <h2><i class="fa-solid fa-right-to-bracket color-primary"></i> Admin Login</h2>
+        <!-- Role Selection Card (Step 1) -->
+        <div id="roleSelectCard" class="loginCard app-card mt20 textCenter">
+            <h2 class="mb10"><i class="fa-solid fa-users-gear color-primary"></i> Select Login Portal</h2>
+            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Please choose your account role to proceed</p>
+
+            <div class="roleOptionsGrid" style="display: flex; flex-direction: column; gap: 15px;">
+                <!-- Admin Role Card -->
+                <div class="roleCard" onclick="selectRole('admin')" style="background: var(--primary-light, #f5fff8); border: 2px solid var(--primary-color, #0b8f47); padding: 18px; border-radius: 14px; cursor: pointer; transition: all 0.25s ease; text-align: left; display: flex; align-items: center; gap: 15px;">
+                    <div style="width: 50px; height: 50px; border-radius: 12px; background: #0b8f47; color: white; display: flex; align-items: center; justify-content: center; font-size: 22px;">
+                        <i class="fa-solid fa-user-shield"></i>
+                    </div>
+                    <div>
+                        <h3 style="color: #0b8f47; margin: 0; font-size: 16px;">Administrator</h3>
+                        <p style="color: #555; margin: 3px 0 0 0; font-size: 12px;">Full access & system settings (Kumar)</p>
+                    </div>
+                </div>
+
+                <!-- Employee Role Card -->
+                <div class="roleCard" onclick="selectRole('employee')" style="background: #f0fdf4; border: 2px solid #0284c7; padding: 18px; border-radius: 14px; cursor: pointer; transition: all 0.25s ease; text-align: left; display: flex; align-items: center; gap: 15px;">
+                    <div style="width: 50px; height: 50px; border-radius: 12px; background: #0284c7; color: white; display: flex; align-items: center; justify-content: center; font-size: 22px;">
+                        <i class="fa-solid fa-user-tie"></i>
+                    </div>
+                    <div>
+                        <h3 style="color: #0284c7; margin: 0; font-size: 16px;">Employee Portal</h3>
+                        <p style="color: #555; margin: 3px 0 0 0; font-size: 12px;">Order entry & payments (Kavitha / Manimekalai)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Login Card (Step 2 - Shown after role selection) -->
+        <div id="loginFormCard" class="loginCard app-card mt20" style="display: none;">
+            <div class="flexBetween mb10" style="border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+                <button type="button" onclick="backToRoleSelect()" class="btn-link" style="background: none; border: none; color: var(--primary-color); cursor: pointer; font-size: 13px; font-weight: 500;">
+                    <i class="fa-solid fa-arrow-left"></i> Change Role
+                </button>
+                <span id="roleBadge" class="badge" style="background: var(--primary-light); color: var(--primary-color);">Admin</span>
+            </div>
+
+            <h2 id="loginTitle"><i class="fa-solid fa-right-to-bracket color-primary"></i> Admin Login</h2>
 
             <!-- Username -->
             <div class="form-group mt20">

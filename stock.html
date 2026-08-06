@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop & Factory Stock Inventory - Modern Chain Link Company</title>
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/orders.css">
+    <link rel="stylesheet" href="css/navigation.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SheetJS for Exporting to Excel -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <style>
+        .location-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .badge-shop {
+            background: #e0f2fe;
+            color: #0369a1;
+            border: 1px solid #bae6fd;
+        }
+        .badge-factory {
+            background: #fef3c7;
+            color: #b45309;
+            border: 1px solid #fde68a;
+        }
+        .badge-low-stock {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fca5a5;
+        }
+        .stock-qty-pill {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f8fafc;
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 4px;
+        }
+        .stock-qty-val {
+            font-weight: 700;
+            font-size: 1.05rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="appContainer">
+
+        <!-- Top Header Navigation -->
+        <header class="appHeader">
+            <div class="headerLeft">
+                <a href="home.html" class="backBtn"><i class="fa-solid fa-arrow-left"></i></a>
+                <div>
+                    <h1 class="pageTitle"><i class="fa-solid fa-boxes-stacked color-primary"></i> Stock Inventory</h1>
+                    <span class="pageSubtitle">Shop & Factory Real-Time Stock Management</span>
+                </div>
+            </div>
+            <div class="headerRight">
+                <button class="btn btn-secondary btn-icon" onclick="exportStockToExcel()" title="Export Stock to Excel">
+                    <i class="fa-solid fa-file-excel" style="color: #107c41;"></i>
+                    <span>Export</span>
+                </button>
+                <button class="btn btn-primary btn-icon" onclick="openAddStockModal()">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Add Item</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Section -->
+        <main class="mainContent">
+
+            <!-- Summary KPI Cards -->
+            <section class="summaryCards">
+                <div class="summaryCard cursor-pointer" onclick="filterByLocation('shop')">
+                    <div class="summaryIcon bg-blue-light">
+                        <i class="fa-solid fa-store color-blue"></i>
+                    </div>
+                    <div class="summaryDetails">
+                        <span class="summaryLabel">Shop Stock</span>
+                        <h3 class="summaryValue" id="totalShopStock">0</h3>
+                        <span class="summarySub">Items in Showroom</span>
+                    </div>
+                </div>
+
+                <div class="summaryCard cursor-pointer" onclick="filterByLocation('factory')">
+                    <div class="summaryIcon bg-orange-light">
+                        <i class="fa-solid fa-industry color-orange"></i>
+                    </div>
+                    <div class="summaryDetails">
+                        <span class="summaryLabel">Factory Stock</span>
+                        <h3 class="summaryValue" id="totalFactoryStock">0</h3>
+                        <span class="summarySub">Warehouse & Factory</span>
+                    </div>
+                </div>
+
+                <div class="summaryCard cursor-pointer" onclick="filterByLocation('low')">
+                    <div class="summaryIcon bg-red-light">
+                        <i class="fa-solid fa-triangle-exclamation color-red"></i>
+                    </div>
+                    <div class="summaryDetails">
+                        <span class="summaryLabel">Low Stock Alert</span>
+                        <h3 class="summaryValue" id="lowStockCount">0</h3>
+                        <span class="summarySub">Items Below Threshold</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Search and Filter Controls -->
+            <section class="controlsSection">
+                <div class="searchBox">
+                    <i class="fa-solid fa-magnifying-glass searchIcon"></i>
+                    <input type="text" id="stockSearchInput" placeholder="Search item by name or category..." onkeyup="handleStockSearch()">
+                </div>
+
+                <div class="filterTabs">
+                    <button class="filterTab active" onclick="setStockFilter('All', this)">All Items</button>
+                    <button class="filterTab" onclick="setStockFilter('Fence Roll', this)">Fence Rolls</button>
+                    <button class="filterTab" onclick="setStockFilter('Barbed Wire', this)">Barbed Wire</button>
+                    <button class="filterTab" onclick="setStockFilter('Binding Wire', this)">Binding Wire</button>
+                    <button class="filterTab" onclick="setStockFilter('Poles', this)">Poles</button>
+                    <button class="filterTab" onclick="setStockFilter('Raw Wire', this)">Raw Wire Coils</button>
+                </div>
+            </section>
+
+            <!-- Location View Filter Banner -->
+            <div id="locationFilterBanner" style="display: none; justify-content: space-between; align-items: center; background: #e0f2fe; color: #0369a1; padding: 10px 16px; border-radius: 8px; margin-bottom: 16px;">
+                <span id="locationFilterText">Showing Shop Stock Only</span>
+                <button class="btn btn-sm" onclick="clearLocationFilter()" style="background: white; color: #0369a1; border: 1px solid #bae6fd;">Show All Stock</button>
+            </div>
+
+            <!-- Stock Items Grid / Table -->
+            <section class="ordersTableCard">
+                <div class="tableHeader">
+                    <h2><i class="fa-solid fa-warehouse"></i> Inventory Items</h2>
+                    <button class="btn btn-sm btn-outline-success" onclick="exportStockToExcel()">
+                        <i class="fa-solid fa-file-excel"></i> Export Excel
+                    </button>
+                </div>
+
+                <div class="tableResponsive">
+                    <table class="ordersTable">
+                        <thead>
+                            <tr>
+                                <th># ID</th>
+                                <th>Item Details</th>
+                                <th>Category</th>
+                                <th>🏪 Shop Stock</th>
+                                <th>🏭 Factory Stock</th>
+                                <th>Total Stock</th>
+                                <th>Unit Price</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stockTableBody">
+                            <!-- Populated via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="emptyStockState" class="emptyState" style="display: none;">
+                    <i class="fa-solid fa-boxes-packing emptyIcon"></i>
+                    <h3>No stock items found</h3>
+                    <p>Try adjusting your search or add a new stock item.</p>
+                </div>
+            </section>
+
+            <div style="display: flex; justify-content: flex-end; margin-top: 15px; margin-bottom: 30px;">
+                <button class="btn btn-secondary" onclick="exportStockToExcel()">
+                    <i class="fa-solid fa-file-excel" style="color: #107c41;"></i> Export Complete Stock to Excel
+                </button>
+            </div>
+
+        </main>
+
+        <!-- Bottom Navigation Bar (Including Stock Section) -->
+        <nav class="bottomNavigation">
+            <a href="home.html" class="navItem">
+                <i class="fa-solid fa-house"></i>
+                <span>Home</span>
+            </a>
+            <a href="orders.html" class="navItem">
+                <i class="fa-solid fa-clipboard-list"></i>
+                <span>Orders</span>
+            </a>
+            <a href="stock.html" class="navItem active">
+                <i class="fa-solid fa-boxes-stacked"></i>
+                <span>Stock</span>
+            </a>
+            <a href="customers.html" class="navItem">
+                <i class="fa-solid fa-users"></i>
+                <span>Customers</span>
+            </a>
+            <a href="profile.html" class="navItem">
+                <i class="fa-solid fa-user"></i>
+                <span>Profile</span>
+            </a>
+        </nav>
+
+    </div>
+
+    <!-- Modal for Adding / Editing Stock -->
+    <div id="stockModal" class="modal">
+        <div class="modalContent" style="max-width: 500px;">
+            <div class="modalHeader">
+                <h3 id="stockModalTitle"><i class="fa-solid fa-box-open color-primary"></i> Add New Stock Item</h3>
+                <button class="closeBtn" onclick="closeStockModal()">&times;</button>
+            </div>
+            <div class="modalBody">
+                <form id="stockForm" onsubmit="saveStockItem(event)">
+                    <input type="hidden" id="stockId">
+
+                    <div class="formGroup">
+                        <label class="formLabel" for="stockItemName">Item Name <span class="text-red">*</span></label>
+                        <input type="text" id="stockItemName" class="formInput" placeholder="e.g. TATA Chain Link 2x2 6ft" required>
+                    </div>
+
+                    <div class="formRow">
+                        <div class="formGroup">
+                            <label class="formLabel" for="stockCategory">Category</label>
+                            <select id="stockCategory" class="formInput">
+                                <option value="Fence Roll">Fence Roll</option>
+                                <option value="Barbed Wire">Barbed Wire</option>
+                                <option value="Binding Wire">Binding Wire</option>
+                                <option value="Poles">Poles / Stones</option>
+                                <option value="Raw Wire">Raw Wire Coils</option>
+                            </select>
+                        </div>
+                        <div class="formGroup">
+                            <label class="formLabel" for="stockUnit">Unit of Measure</label>
+                            <select id="stockUnit" class="formInput">
+                                <option value="Rolls">Rolls</option>
+                                <option value="Kg">Kg</option>
+                                <option value="Pieces">Pieces</option>
+                                <option value="Sq.Ft">Sq.Ft</option>
+                                <option value="Bundles">Bundles</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="formRow">
+                        <div class="formGroup">
+                            <label class="formLabel" for="stockShopQty"><i class="fa-solid fa-store color-blue"></i> Shop Quantity</label>
+                            <input type="number" step="0.1" id="stockShopQty" class="formInput" placeholder="0.0" min="0" value="0">
+                        </div>
+                        <div class="formGroup">
+                            <label class="formLabel" for="stockFactoryQty"><i class="fa-solid fa-industry color-orange"></i> Factory Quantity</label>
+                            <input type="number" step="0.1" id="stockFactoryQty" class="formInput" placeholder="0.0" min="0" value="0">
+                        </div>
+                    </div>
+
+                    <div class="formRow">
+                        <div class="formGroup">
+                            <label class="formLabel" for="stockReorderLevel">Low Stock Warning Threshold</label>
+                            <input type="number" step="0.1" id="stockReorderLevel" class="formInput" placeholder="5.0" min="0" value="5">
+                        </div>
+                        <div class="formGroup">
+                            <label class="formLabel" for="stockPrice">Price / Unit (₹)</label>
+                            <input type="number" step="0.1" id="stockPrice" class="formInput" placeholder="0.0" min="0" value="0">
+                        </div>
+                    </div>
+
+                    <div class="formGroup">
+                        <label class="formLabel" for="stockNotes">Notes / Specifications</label>
+                        <textarea id="stockNotes" class="formInput" rows="2" placeholder="Additional details..."></textarea>
+                    </div>
+
+                    <div class="modalFooter">
+                        <button type="button" class="btn btn-secondary" onclick="closeStockModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-check"></i> Save Stock</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Utilities JS -->
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/stock.js"></script>
+</body>
+
+</html>

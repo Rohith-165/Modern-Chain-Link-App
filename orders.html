@@ -23,9 +23,14 @@
             <h1><i class="fa-solid fa-list-check"></i> Manage Orders</h1>
             <p>View, search, and filter customer fencing orders</p>
         </div>
-        <button onclick="location.href='add-order.html'" class="btn-outline btn-sm" style="color:white; border-color:white;">
-            <i class="fa-solid fa-plus"></i> New Order
-        </button>
+        <div class="flexGap">
+            <button type="button" onclick="exportOrdersToExcel()" class="btn-primary btn-sm" style="background: #16a34a; border: none; color: white;">
+                <i class="fa-solid fa-file-excel"></i> Export to Excel
+            </button>
+            <button onclick="location.href='add-order.html'" class="btn-outline btn-sm" style="color:white; border-color:white;">
+                <i class="fa-solid fa-plus"></i> New Order
+            </button>
+        </div>
     </header>
 
     <!-- Controls Section (Search & Filter) -->
@@ -36,14 +41,19 @@
                 <input type="text" id="searchInput" placeholder="Search by Order ID, Customer Name, or Phone..." class="searchInput">
             </div>
 
-            <div class="filterContainer">
-                <i class="fa-solid fa-filter filterIcon"></i>
-                <select id="statusFilter" class="statusFilter">
-                    <option value="All">All Statuses</option>
-                    <option value="Pending">Pending</option>
-                    <option value="Processing">Processing</option>
-                    <option value="Delivered">Delivered</option>
-                </select>
+            <div class="filterContainer flexGap">
+                <div style="flex: 1; display: flex; align-items: center; position: relative;">
+                    <i class="fa-solid fa-filter filterIcon"></i>
+                    <select id="statusFilter" class="statusFilter" style="width: 100%;">
+                        <option value="All">All Statuses</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Processing">Processing</option>
+                        <option value="Delivered">Delivered</option>
+                    </select>
+                </div>
+                <button type="button" onclick="exportOrdersToExcel()" class="btn-sm primaryBtn" style="background: #16a34a; white-space: nowrap;">
+                    <i class="fa-solid fa-file-excel"></i> Excel
+                </button>
             </div>
         </div>
     </section>
@@ -64,7 +74,7 @@
     </section>
 
     <!-- Orders List Container -->
-    <section class="ordersSection mt20">
+    <section class="ordersSection mt20 mb30">
         <div id="ordersContainer" class="ordersGrid">
             <div class="emptyCard textCenter app-card">
                 <i class="fa-solid fa-inbox color-primary emptyIcon"></i>
@@ -100,6 +110,7 @@
     </a>
 </nav>
 
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/api.js"></script>
 <script src="js/navigation.js"></script>

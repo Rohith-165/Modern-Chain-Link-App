@@ -2,9 +2,11 @@ from sqlalchemy.orm import Session
 from datetime import datetime, UTC
 from app.models.order import Order
 from app.models.payment import Payment
+from app.models.user import User
 from app.schemas.order import OrderCreate, OrderUpdate
 from app.services.customer_service import get_or_create_customer
 from app.schemas.customer import CustomerCreate
+from app.services.audit_service import record_audit
 
 def generate_order_id(db: Session) -> str:
     year = datetime.now().year
@@ -12,7 +14,7 @@ def generate_order_id(db: Session) -> str:
     serial = str(count).zfill(4)
     return f"MCLC-{year}-{serial}"
 
-def create_order(db: Session, order_in: OrderCreate) -> Order:
+def create_order(db: Session, order_in: OrderCreate, current_user: User = None) -> Order:
     # Get or create customer
     customer = get_or_create_customer(
         db,
@@ -61,6 +63,16 @@ def create_order(db: Session, order_in: OrderCreate) -> Order:
     db.commit()
     db.refresh(db_order)
 
+    # Record audit log
+    record_audit(
+        db=db,
+        entity_type="Order",
+        entity_id=db_order.order_id,
+        action="Created Order",
+        user=current_user,
+        details=f"Created order for {db_order.customer_name} ({db_order.height}ft x {db_order.length}ft, Total: ₹{db_order.total_amount})"
+    )
+
     # Initial payment record if advance paid
     if order_in.amount_paid and order_in.amount_paid > 0:
         payment = Payment(
@@ -73,6 +85,14 @@ def create_order(db: Session, order_in: OrderCreate) -> Order:
         db.add(payment)
         db.commit()
         db.refresh(db_order)
+        record_audit(
+            db=db,
+            entity_type="Payment",
+            entity_id=db_order.order_id,
+            action="Advance Payment Recorded",
+            user=current_user,
+            details=f"Advance payment of ₹{order_in.amount_paid} recorded on order creation."
+        )
 
     return db_order
 
@@ -92,10 +112,18 @@ def get_orders(db: Session, status: str = None, search: str = None):
 def get_order_by_order_id(db: Session, order_id: str) -> Order:
     return db.query(Order).filter(Order.order_id == order_id).first()
 
-def update_order(db: Session, order_id: str, order_in: OrderUpdate) -> Order:
+def update_order(db: Session, order_id: str, order_in: OrderUpdate, current_user: User = None) -> Order:
     db_order = get_order_by_order_id(db, order_id)
     if not db_order:
         return None
+
+    changes = []
+    if db_order.status != order_in.status:
+        changes.append(f"Status: '{db_order.status}' ➔ '{order_in.status}'")
+    if db_order.height != order_in.height or db_order.length != order_in.length:
+        changes.append(f"Dimensions: {db_order.height}x{db_order.length}ft ➔ {order_in.height}x{order_in.length}ft")
+    if db_order.sqft_price != order_in.sqft_price:
+        changes.append(f"Rate: ₹{db_order.sqft_price}/sqft ➔ ₹{order_in.sqft_price}/sqft")
 
     area = order_in.height * order_in.length
     material_cost = area * order_in.sqft_price
@@ -104,6 +132,9 @@ def update_order(db: Session, order_id: str, order_in: OrderUpdate) -> Order:
     
     total_amount = material_cost + extra_charges
     balance_amount = max(0.0, total_amount - db_order.amount_paid)
+
+    if db_order.total_amount != total_amount:
+        changes.append(f"Total Amount: ₹{db_order.total_amount} ➔ ₹{total_amount}")
 
     db_order.customer_name = order_in.customer_name
     db_order.phone_number = order_in.phone_number
@@ -128,6 +159,17 @@ def update_order(db: Session, order_id: str, order_in: OrderUpdate) -> Order:
 
     db.commit()
     db.refresh(db_order)
+
+    change_desc = "; ".join(changes) if changes else "Updated order details."
+    record_audit(
+        db=db,
+        entity_type="Order",
+        entity_id=db_order.order_id,
+        action="Updated Order",
+        user=current_user,
+        details=change_desc
+    )
+
     return db_order
 
 def delete_order(db: Session, order_id: str) -> bool:

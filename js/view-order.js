@@ -84,8 +84,68 @@ async function loadOrder() {
         toggleInstallationFields();
         calculateAmounts();
         renderPaymentHistory();
+        renderAuditHistory();
     } catch (err) {
         UI.error("Error loading order: " + err.message);
+    }
+}
+
+async function renderAuditHistory() {
+    const container = document.getElementById("auditHistoryContainer");
+    if (!container) return;
+
+    try {
+        const history = await API.getOrderHistory(currentOrderId);
+        container.innerHTML = "";
+
+        if (!history || history.length === 0) {
+            container.innerHTML = `
+                <p class="text-muted textCenter mt10" style="font-size: 13px;">
+                    <i class="fa-solid fa-circle-info"></i> No activity history recorded yet.
+                </p>
+            `;
+            return;
+        }
+
+        history.forEach(log => {
+            const dateStr = new Date(log.created_at).toLocaleString("en-IN", {
+                dateStyle: "medium",
+                timeStyle: "short"
+            });
+
+            let badgeColor = "var(--primary-color)";
+            let iconClass = "fa-pen-to-square";
+            if (log.action.includes("Created")) {
+                badgeColor = "var(--success-color)";
+                iconClass = "fa-circle-plus";
+            } else if (log.action.includes("Payment")) {
+                badgeColor = "#0284c7";
+                iconClass = "fa-indian-rupee-sign";
+            }
+
+            const item = document.createElement("div");
+            item.className = "auditItem mt10";
+            item.style.cssText = "padding: 12px; border-left: 3px solid " + badgeColor + "; background: var(--bg-subtle); border-radius: 6px; margin-bottom: 10px;";
+            item.innerHTML = `
+                <div class="flexBetween mb5">
+                    <span style="font-weight: 600; color: ${badgeColor}; font-size: 13px;">
+                        <i class="fa-solid ${iconClass}"></i> ${log.action}
+                    </span>
+                    <small style="color: var(--text-muted); font-size: 11px;">
+                        <i class="fa-solid fa-clock"></i> ${dateStr}
+                    </small>
+                </div>
+                <div style="font-size: 13px; color: var(--text-primary);" class="mb5">
+                    ${log.details || 'Updated order specifications'}
+                </div>
+                <div style="font-size: 11px; color: var(--text-muted);">
+                    <i class="fa-solid fa-user-check"></i> Performed by: <strong>${log.user_name}</strong> (${log.user_email})
+                </div>
+            `;
+            container.appendChild(item);
+        });
+    } catch (err) {
+        container.innerHTML = `<p class="text-danger textCenter" style="font-size: 12px;">Failed to load activity logs.</p>`;
     }
 }
 

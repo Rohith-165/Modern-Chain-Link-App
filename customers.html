@@ -23,16 +23,26 @@
             <h1><i class="fa-solid fa-users"></i> Customer History</h1>
             <p>Track customer profiles, lifetime value, and order records</p>
         </div>
-        <button onclick="location.href='add-order.html'" class="btn-outline btn-sm" style="color:white; border-color:white;">
-            <i class="fa-solid fa-user-plus"></i> New Order
-        </button>
+        <div class="flexGap">
+            <button type="button" onclick="exportCustomersToExcel()" class="btn-primary btn-sm" style="background: #16a34a; border: none; color: white;">
+                <i class="fa-solid fa-file-excel"></i> Export Excel
+            </button>
+            <button onclick="location.href='add-order.html'" class="btn-outline btn-sm" style="color:white; border-color:white;">
+                <i class="fa-solid fa-user-plus"></i> New Order
+            </button>
+        </div>
     </header>
 
     <!-- Search Section -->
     <section class="controlsSection mt20">
-        <div class="searchContainer">
-            <i class="fa-solid fa-magnifying-glass searchIcon"></i>
-            <input type="text" id="customerSearchInput" placeholder="Search by Customer Name or Phone Number..." class="searchInput">
+        <div class="flexGap">
+            <div class="searchContainer" style="flex: 1;">
+                <i class="fa-solid fa-magnifying-glass searchIcon"></i>
+                <input type="text" id="customerSearchInput" placeholder="Search by Customer Name or Phone Number..." class="searchInput">
+            </div>
+            <button type="button" onclick="exportCustomersToExcel()" class="btn-sm primaryBtn" style="background: #16a34a; white-space: nowrap;">
+                <i class="fa-solid fa-file-excel"></i> Excel
+            </button>
         </div>
     </section>
 
@@ -91,6 +101,7 @@
     </a>
 </nav>
 
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/api.js"></script>
 <script src="js/navigation.js"></script>

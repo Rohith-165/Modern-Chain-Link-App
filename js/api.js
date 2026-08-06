@@ -255,6 +255,10 @@ const API = {
         }, () => null);
     },
 
+    async getOrderHistory(orderId) {
+        return this.request(`/orders/${orderId}/history`, { method: "GET" }, () => []);
+    },
+
     // 5. PAYMENTS
     async addPayment(orderId, paymentPayload) {
         return this.request(`/payments/${orderId}`, {

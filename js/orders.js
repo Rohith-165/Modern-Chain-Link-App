@@ -119,3 +119,75 @@ function viewOrder(orderId) {
     localStorage.setItem("selectedOrderId", orderId);
     window.location.href = "view-order.html";
 }
+
+async function exportOrdersToExcel() {
+    UI.showLoader("Generating Excel Spreadsheet...");
+    try {
+        const searchText = document.getElementById("searchInput") ? document.getElementById("searchInput").value.trim() : "";
+        const status = document.getElementById("statusFilter") ? document.getElementById("statusFilter").value : "All";
+
+        const orders = await API.getOrders(status, searchText);
+
+        if (!orders || orders.length === 0) {
+            UI.hideLoader();
+            UI.error("No order data available to export.");
+            return;
+        }
+
+        const excelData = orders.map((o, idx) => ({
+            "S.No": idx + 1,
+            "Order ID": o.order_id || o.orderId,
+            "Customer Name": o.customer_name || o.customerName,
+            "Phone Number": o.phone_number || o.phoneNumber,
+            "Order Type": o.order_type || o.orderType || "Material",
+            "Material Type": o.material_type || o.materialType || "Fence",
+            "Diamond Size": o.diamond_size || o.diamondSize || "2 X 2 Inch",
+            "Brand": o.brand || "TATA",
+            "Height (Ft)": o.height || 0,
+            "Length (Ft)": o.length || 0,
+            "Total Area (Sq.Ft)": o.area || ((o.height || 0) * (o.length || 0)),
+            "Sq.Ft Price (₹)": o.sqft_price || o.sqftPrice || 0,
+            "Material Cost (₹)": o.material_cost || o.materialCost || 0,
+            "Total Amount (₹)": o.total_amount || o.totalAmount || 0,
+            "Amount Paid (₹)": o.amount_paid || o.amountPaid || 0,
+            "Balance Due (₹)": o.balance_amount || o.balanceAmount || 0,
+            "Status": o.status || "Pending",
+            "Date": o.created_at ? new Date(o.created_at).toLocaleDateString("en-IN") : "N/A"
+        }));
+
+        if (typeof XLSX === "undefined") {
+            // Fallback CSV generation if SheetJS CDN is offline
+            let csvContent = "data:text/csv;charset=utf-8,";
+            const headers = Object.keys(excelData[0]);
+            csvContent += headers.join(",") + "\n";
+            excelData.forEach(row => {
+                csvContent += headers.map(h => `"${row[h] || ''}"`).join(",") + "\n";
+            });
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Modern_Chain_Link_Orders_${new Date().toISOString().slice(0, 10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } else {
+            const worksheet = XLSX.utils.json_to_sheet(excelData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Orders");
+            
+            // Set auto column width
+            const colWidths = Object.keys(excelData[0]).map(key => ({
+                wch: Math.max(key.length + 2, 12)
+            }));
+            worksheet["!cols"] = colWidths;
+
+            XLSX.writeFile(workbook, `Modern_Chain_Link_Orders_${new Date().toISOString().slice(0, 10)}.xlsx`);
+        }
+
+        UI.hideLoader();
+        UI.success("Excel sheet downloaded successfully!");
+    } catch (err) {
+        UI.hideLoader();
+        UI.error("Failed to export Excel: " + err.message);
+    }
+}

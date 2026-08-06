@@ -131,3 +131,62 @@ function viewOrderFromCustomer(orderId) {
     localStorage.setItem("selectedOrderId", orderId);
     window.location.href = "view-order.html";
 }
+
+async function exportCustomersToExcel() {
+    UI.showLoader("Generating Customer Excel Ledger...");
+    try {
+        const searchText = document.getElementById("customerSearchInput") ? document.getElementById("customerSearchInput").value.trim() : "";
+        const customers = await API.getCustomers(searchText);
+
+        if (!customers || customers.length === 0) {
+            UI.hideLoader();
+            UI.error("No customer records found to export.");
+            return;
+        }
+
+        const excelData = customers.map((c, idx) => ({
+            "S.No": idx + 1,
+            "Customer Name": c.name || c.customerName,
+            "Phone Number": c.phone_number || c.phoneNumber,
+            "Address": c.address || "N/A",
+            "Total Orders": c.total_orders || (c.orders || []).length,
+            "Total Spent (₹)": c.total_spent || 0,
+            "Total Paid (₹)": c.total_paid || 0,
+            "Balance Due (₹)": c.balance_due || 0,
+            "Last Order Date": c.last_order_date ? new Date(c.last_order_date).toLocaleDateString("en-IN") : "N/A"
+        }));
+
+        if (typeof XLSX === "undefined") {
+            let csvContent = "data:text/csv;charset=utf-8,";
+            const headers = Object.keys(excelData[0]);
+            csvContent += headers.join(",") + "\n";
+            excelData.forEach(row => {
+                csvContent += headers.map(h => `"${row[h] || ''}"`).join(",") + "\n";
+            });
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Modern_Chain_Link_Customers_${new Date().toISOString().slice(0, 10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } else {
+            const worksheet = XLSX.utils.json_to_sheet(excelData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Customers");
+
+            const colWidths = Object.keys(excelData[0]).map(key => ({
+                wch: Math.max(key.length + 2, 12)
+            }));
+            worksheet["!cols"] = colWidths;
+
+            XLSX.writeFile(workbook, `Modern_Chain_Link_Customers_${new Date().toISOString().slice(0, 10)}.xlsx`);
+        }
+
+        UI.hideLoader();
+        UI.success("Customer Excel ledger downloaded successfully!");
+    } catch (err) {
+        UI.hideLoader();
+        UI.error("Failed to export customers: " + err.message);
+    }
+}

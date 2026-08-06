@@ -8,6 +8,7 @@ from app.database.session import get_db
 from app.models.user import User
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/login")
+oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/login", auto_error=False)
 
 def get_user_by_email(db: Session, email: str) -> User:
     return db.query(User).filter(User.email == email).first()
@@ -21,19 +22,23 @@ def authenticate_user(db: Session, email: str, password: str):
     return user
 
 def init_default_admin(db: Session):
-    admin = get_user_by_email(db, "Kumar@modernchainlink.com")
-    if not admin:
-        new_admin = User(
-            email="Kumar@modernchainlink.com",
-            full_name="Santhosh Kumar",
-            hashed_password=get_password_hash("modern@123"),
-            is_active=True,
-            is_superuser=True
-        )
-        db.add(new_admin)
-        db.commit()
-        db.refresh(new_admin)
-    return admin
+    users_data = [
+        {"email": "Kumar@modernchainlink.com", "full_name": "Santhosh Kumar", "password": "modern@123", "is_superuser": True},
+        {"email": "Kavitha@modernchainlink.com", "full_name": "Kavitha", "password": "Kavitha@123", "is_superuser": False},
+        {"email": "Manimekalai@modernchainlink.com", "full_name": "Manimekalai", "password": "Mani@123", "is_superuser": False},
+    ]
+    for u in users_data:
+        existing = get_user_by_email(db, u["email"])
+        if not existing:
+            new_user = User(
+                email=u["email"],
+                full_name=u["full_name"],
+                hashed_password=get_password_hash(u["password"]),
+                is_active=True,
+                is_superuser=u["is_superuser"]
+            )
+            db.add(new_user)
+            db.commit()
 
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
     credentials_exception = HTTPException(
@@ -53,6 +58,18 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     if user is None:
         raise credentials_exception
     return user
+
+def get_current_user_optional(token: Optional[str] = Depends(oauth2_scheme_optional), db: Session = Depends(get_db)) -> Optional[User]:
+    if not token:
+        return None
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        email: str = payload.get("sub")
+        if email:
+            return get_user_by_email(db, email=email)
+    except Exception:
+        pass
+    return None
 
 def get_current_active_admin(current_user: User = Depends(get_current_user)) -> User:
     if not current_user.is_active or not current_user.is_superuser:

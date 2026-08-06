@@ -1,13 +1,19 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, StreamingResponse
 from sqlalchemy.orm import Session
 from typing import List, Optional
+import io
+
 from app.dependencies import get_db
 from app.schemas.order import OrderCreate, OrderUpdate, OrderResponse
+from app.schemas.audit import AuditLogResponse
 from app.services import order_service
 from app.services.invoice_service import generate_invoice_html
+from app.services.audit_service import get_entity_history
 from app.models.company import Company
 from app.core.logger import log_order_event
+from app.core.auth import get_current_user_optional
+from app.models.user import User
 
 router = APIRouter()
 
@@ -22,11 +28,19 @@ def read_orders(
 @router.post("", response_model=OrderResponse, status_code=status.HTTP_201_CREATED)
 def create_order(
     order_in: OrderCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: Optional[User] = Depends(get_current_user_optional)
 ):
-    order = order_service.create_order(db, order_in)
+    order = order_service.create_order(db, order_in, current_user=current_user)
     log_order_event("CREATE", order.order_id, f"Customer: {order.customer_name}, Total: ₹{order.total_amount}")
     return order
+
+@router.get("/{order_id}/history", response_model=List[AuditLogResponse])
+def get_order_history(
+    order_id: str,
+    db: Session = Depends(get_db)
+):
+    return get_entity_history(db, entity_id=order_id)
 
 @router.get("/{order_id}", response_model=OrderResponse)
 def read_order(
@@ -42,9 +56,10 @@ def read_order(
 def update_order(
     order_id: str,
     order_in: OrderUpdate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: Optional[User] = Depends(get_current_user_optional)
 ):
-    order = order_service.update_order(db, order_id, order_in)
+    order = order_service.update_order(db, order_id, order_in, current_user=current_user)
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
     log_order_event("UPDATE", order.order_id, f"Status: {order.status}")

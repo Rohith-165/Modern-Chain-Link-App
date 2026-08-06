@@ -8,7 +8,7 @@ from app.database.base import Base
 from app.services.auth_service import init_default_admin
 
 # Import models so Base.metadata knows about them
-from app.models import user, customer, order, payment  # noqa: F401
+from app.models import user, customer, order, payment, audit_log  # noqa: F401
 
 
 @asynccontextmanager

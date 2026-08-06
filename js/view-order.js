@@ -69,6 +69,9 @@ async function loadOrder() {
         document.getElementById("diamondSize").value = currentOrder.diamond_size || currentOrder.diamondSize || "2 X 2 Inch";
         document.getElementById("brand").value = currentOrder.brand || "TATA";
 
+        document.getElementById("orderedDate").value = currentOrder.ordered_date || currentOrder.orderedDate || (currentOrder.created_at ? currentOrder.created_at.split('T')[0] : new Date().toISOString().split('T')[0]);
+        document.getElementById("deliveryDate").value = currentOrder.delivery_date || currentOrder.deliveryDate || "";
+
         document.getElementById("height").value = currentOrder.height;
         document.getElementById("length").value = currentOrder.length;
         document.getElementById("sqftPrice").value = currentOrder.sqft_price || currentOrder.sqftPrice;
@@ -152,25 +155,40 @@ async function renderAuditHistory() {
 function toggleInstallationFields() {
     const orderType = document.getElementById("orderType").value;
     const installationFields = document.getElementById("installationFields");
+    const sqftPriceLabel = document.getElementById("sqftPriceLabel");
 
     if (orderType === "Installation") {
         installationFields.style.display = "block";
+        if (sqftPriceLabel) {
+            sqftPriceLabel.innerHTML = '<i class="fa-solid fa-tag"></i> Price per Ft (₹) *';
+        }
     } else {
         installationFields.style.display = "none";
         document.getElementById("labour").value = 0;
         document.getElementById("travel").value = 0;
         document.getElementById("stone").value = 0;
+        if (sqftPriceLabel) {
+            sqftPriceLabel.innerHTML = '<i class="fa-solid fa-tag"></i> Price per Sq.Ft (₹) *';
+        }
     }
     calculateAmounts();
 }
 
 function calculateAmounts() {
+    const orderType = document.getElementById("orderType").value;
     const height = Number(document.getElementById("height").value) || 0;
     const length = Number(document.getElementById("length").value) || 0;
     const sqftPrice = Number(document.getElementById("sqftPrice").value) || 0;
 
     const area = height * length;
-    const materialCost = area * sqftPrice;
+    
+    // If Material + Installation, material cost is calculated per Running Ft (Length * Price per Ft)
+    let materialCost = 0;
+    if (orderType === "Installation") {
+        materialCost = length * sqftPrice;
+    } else {
+        materialCost = area * sqftPrice;
+    }
 
     const barbedWire = Number(document.getElementById("barbedWire").value) || 0;
     const bindingWire = Number(document.getElementById("bindingWire").value) || 0;
@@ -320,6 +338,8 @@ async function updateOrder(event) {
             material_type: document.getElementById("materialType").value,
             diamond_size: document.getElementById("diamondSize").value,
             brand: document.getElementById("brand").value,
+            ordered_date: document.getElementById("orderedDate").value || null,
+            delivery_date: document.getElementById("deliveryDate").value || null,
             height: Number(document.getElementById("height").value || 0),
             length: Number(document.getElementById("length").value || 0),
             sqft_price: Number(document.getElementById("sqftPrice").value || 0),

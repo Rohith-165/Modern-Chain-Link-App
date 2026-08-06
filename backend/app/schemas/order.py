@@ -21,6 +21,8 @@ class OrderBase(BaseModel):
     stone: Optional[float] = 0.0
     amount_paid: Optional[float] = 0.0
     status: Optional[str] = "Pending"
+    ordered_date: Optional[str] = None
+    delivery_date: Optional[str] = None
 
 class OrderCreate(OrderBase):
     pass

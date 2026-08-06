@@ -26,7 +26,13 @@ def create_order(db: Session, order_in: OrderCreate, current_user: User = None) 
     )
 
     area = order_in.height * order_in.length
-    material_cost = area * order_in.sqft_price
+    if order_in.order_type == "Installation":
+        # Price per Ft (Length * Price per Ft)
+        material_cost = order_in.length * order_in.sqft_price
+    else:
+        # Price per Sq.Ft (Area * Price per Sq.Ft)
+        material_cost = area * order_in.sqft_price
+
     extra_charges = (order_in.barbed_wire or 0) + (order_in.binding_wire or 0) + \
                     (order_in.labour or 0) + (order_in.travel or 0) + (order_in.stone or 0)
     
@@ -56,7 +62,9 @@ def create_order(db: Session, order_in: OrderCreate, current_user: User = None) 
         total_amount=total_amount,
         amount_paid=order_in.amount_paid or 0.0,
         balance_amount=balance_amount,
-        status=order_in.status or "Pending"
+        status=order_in.status or "Pending",
+        ordered_date=order_in.ordered_date,
+        delivery_date=order_in.delivery_date
     )
     
     db.add(db_order)
@@ -126,7 +134,13 @@ def update_order(db: Session, order_id: str, order_in: OrderUpdate, current_user
         changes.append(f"Rate: ₹{db_order.sqft_price}/sqft ➔ ₹{order_in.sqft_price}/sqft")
 
     area = order_in.height * order_in.length
-    material_cost = area * order_in.sqft_price
+    if order_in.order_type == "Installation":
+        # Price per Ft (Length * Price per Ft)
+        material_cost = order_in.length * order_in.sqft_price
+    else:
+        # Price per Sq.Ft (Area * Price per Sq.Ft)
+        material_cost = area * order_in.sqft_price
+
     extra_charges = (order_in.barbed_wire or 0) + (order_in.binding_wire or 0) + \
                     (order_in.labour or 0) + (order_in.travel or 0) + (order_in.stone or 0)
     
@@ -156,6 +170,8 @@ def update_order(db: Session, order_id: str, order_in: OrderUpdate, current_user
     db_order.total_amount = total_amount
     db_order.balance_amount = balance_amount
     db_order.status = order_in.status
+    db_order.ordered_date = order_in.ordered_date
+    db_order.delivery_date = order_in.delivery_date
 
     db.commit()
     db.refresh(db_order)

@@ -143,16 +143,17 @@ async function exportOrdersToExcel() {
             "Material Type": o.material_type || o.materialType || "Fence",
             "Diamond Size": o.diamond_size || o.diamondSize || "2 X 2 Inch",
             "Brand": o.brand || "TATA",
+            "Ordered Date": o.ordered_date || o.orderedDate || (o.created_at ? new Date(o.created_at).toLocaleDateString("en-IN") : "N/A"),
+            "Expected Delivery Date": o.delivery_date || o.deliveryDate || "N/A",
             "Height (Ft)": o.height || 0,
             "Length (Ft)": o.length || 0,
             "Total Area (Sq.Ft)": o.area || ((o.height || 0) * (o.length || 0)),
-            "Sq.Ft Price (₹)": o.sqft_price || o.sqftPrice || 0,
+            "Price per Sq.Ft / Ft (₹)": o.sqft_price || o.sqftPrice || 0,
             "Material Cost (₹)": o.material_cost || o.materialCost || 0,
             "Total Amount (₹)": o.total_amount || o.totalAmount || 0,
             "Amount Paid (₹)": o.amount_paid || o.amountPaid || 0,
             "Balance Due (₹)": o.balance_amount || o.balanceAmount || 0,
-            "Status": o.status || "Pending",
-            "Date": o.created_at ? new Date(o.created_at).toLocaleDateString("en-IN") : "N/A"
+            "Status": o.status || "Pending"
         }));
 
         if (typeof XLSX === "undefined") {

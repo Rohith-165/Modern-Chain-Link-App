@@ -37,6 +37,8 @@ class Order(Base):
     balance_amount = Column(Float, default=0.0)
 
     status = Column(String, default="Pending", index=True)
+    ordered_date = Column(String, nullable=True)
+    delivery_date = Column(String, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(UTC))
 
     # Relationships

@@ -10,8 +10,12 @@ from app.models.user import User
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/login")
 oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/login", auto_error=False)
 
+from sqlalchemy import func
+
 def get_user_by_email(db: Session, email: str) -> User:
-    return db.query(User).filter(User.email == email).first()
+    if not email:
+        return None
+    return db.query(User).filter(func.lower(User.email) == func.lower(email.strip())).first()
 
 def authenticate_user(db: Session, email: str, password: str):
     user = get_user_by_email(db, email)
@@ -38,6 +42,13 @@ def init_default_admin(db: Session):
                 is_superuser=u["is_superuser"]
             )
             db.add(new_user)
+            db.commit()
+        else:
+            # Ensure password is set to default if needed
+            existing.hashed_password = get_password_hash(u["password"])
+            existing.full_name = u["full_name"]
+            existing.is_active = True
+            existing.is_superuser = u["is_superuser"]
             db.commit()
 
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:

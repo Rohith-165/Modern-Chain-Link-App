@@ -33,23 +33,23 @@ def init_default_admin(db: Session):
     ]
     for u in users_data:
         existing = get_user_by_email(db, u["email"])
+        new_hash = get_password_hash(u["password"])
         if not existing:
             new_user = User(
                 email=u["email"],
                 full_name=u["full_name"],
-                hashed_password=get_password_hash(u["password"]),
+                hashed_password=new_hash,
                 is_active=True,
                 is_superuser=u["is_superuser"]
             )
             db.add(new_user)
-            db.commit()
         else:
-            # Ensure password is set to default if needed
-            existing.hashed_password = get_password_hash(u["password"])
+            existing.hashed_password = new_hash
             existing.full_name = u["full_name"]
             existing.is_active = True
             existing.is_superuser = u["is_superuser"]
-            db.commit()
+            db.add(existing)
+        db.commit()
 
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
     credentials_exception = HTTPException(

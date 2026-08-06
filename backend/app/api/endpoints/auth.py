@@ -29,3 +29,9 @@ def login_for_access_token(
         "token_type": "bearer",
         "user": user
     }
+
+@router.post("/seed-users")
+def seed_default_users(db: Session = Depends(get_db)):
+    from app.core.auth import init_default_admin
+    init_default_admin(db)
+    return {"status": "ok", "message": "Default admin and employee accounts seeded successfully."}

@@ -37,8 +37,39 @@ def login_for_access_token(
         "user": user
     }
 
-@router.post("/seed-users")
-def seed_default_users(db: Session = Depends(get_db)):
-    from app.core.auth import init_default_admin
-    init_default_admin(db)
-    return {"status": "ok", "message": "Default admin and employee accounts seeded successfully."}
+@router.post("/reset-users-now")
+def reset_users_now(db: Session = Depends(get_db)):
+    from app.core.auth import get_user_by_email
+    from app.core.security import get_password_hash, verify_password
+    from app.models.user import User
+
+    users_data = [
+        {"email": "Kumar@modernchainlink.com", "full_name": "Santhosh Kumar", "password": "modern@123", "is_superuser": True},
+        {"email": "Kavitha@modernchainlink.com", "full_name": "Kavitha", "password": "Kavitha@123", "is_superuser": False},
+        {"email": "Manimekalai@modernchainlink.com", "full_name": "Manimekalai", "password": "Mani@123", "is_superuser": False},
+    ]
+    results = []
+    for u in users_data:
+        usr = get_user_by_email(db, u["email"])
+        new_hash = get_password_hash(u["password"])
+        if not usr:
+            usr = User(
+                email=u["email"],
+                full_name=u["full_name"],
+                hashed_password=new_hash,
+                is_active=True,
+                is_superuser=u["is_superuser"]
+            )
+            db.add(usr)
+        else:
+            usr.hashed_password = new_hash
+            usr.full_name = u["full_name"]
+            usr.is_active = True
+            usr.is_superuser = u["is_superuser"]
+            db.add(usr)
+        db.commit()
+        db.refresh(usr)
+        
+        auth_ok = verify_password(u["password"], usr.hashed_password)
+        results.append({"email": usr.email, "id": usr.id, "auth_verified": auth_ok})
+    return {"status": "ok", "users": results}

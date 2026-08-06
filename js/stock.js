@@ -263,6 +263,21 @@ async function confirmDeleteStock(id) {
     }
 }
 
+async function confirmDeleteAllStock() {
+    if (!confirm("⚠️ Are you sure you want to DELETE ALL STOCK ITEMS? This will clear all shop and factory inventory!")) return;
+
+    UI.showLoader("Clearing all stock items...");
+    try {
+        await API.clearAllStock();
+        UI.hideLoader();
+        UI.success("All stock items have been deleted!");
+        await loadStockData();
+    } catch (err) {
+        UI.hideLoader();
+        UI.error("Failed to clear stock items: " + err.message);
+    }
+}
+
 function exportStockToExcel() {
     if (!allStockItems || allStockItems.length === 0) {
         UI.warning("No stock items available to export.");

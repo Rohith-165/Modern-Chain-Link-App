@@ -311,25 +311,25 @@ const API = {
         if (search) params.append("search", search);
         const query = params.toString() ? `?${params.toString()}` : "";
         return this.request(`/stock${query}`, { method: "GET" }, () => {
-            const localStock = JSON.parse(localStorage.getItem("stockItems")) || [
-                { id: 1, item_name: "TATA Chain Link Fence 2x2 (6 Ft)", category: "Fence Roll", unit: "Rolls", shop_quantity: 25, factory_quantity: 120, reorder_level: 10, price_per_unit: 3500 },
-                { id: 2, item_name: "TATA Chain Link Fence 2x2 (5 Ft)", category: "Fence Roll", unit: "Rolls", shop_quantity: 15, factory_quantity: 80, reorder_level: 8, price_per_unit: 2900 },
-                { id: 3, item_name: "Micon Barbed Wire (12 Gauge)", category: "Barbed Wire", unit: "Kg", shop_quantity: 150, factory_quantity: 650, reorder_level: 50, price_per_unit: 95 },
-                { id: 4, item_name: "Binding Wire (14 Gauge)", category: "Binding Wire", unit: "Kg", shop_quantity: 45, factory_quantity: 200, reorder_level: 20, price_per_unit: 85 },
-                { id: 5, item_name: "Stone Poles 7 Feet", category: "Poles", unit: "Pieces", shop_quantity: 60, factory_quantity: 300, reorder_level: 15, price_per_unit: 420 },
-                { id: 6, item_name: "Galvanized GI Wire Raw Coil", category: "Raw Wire", unit: "Kg", shop_quantity: 500, factory_quantity: 3500, reorder_level: 200, price_per_unit: 72 }
-            ];
-            let items = localStock;
-            if (category && category !== "All") items = items.filter(i => i.category === category);
-            if (search) {
-                const s = search.toLowerCase();
-                items = items.filter(i => (i.item_name || "").toLowerCase().includes(s));
+            if (localStorage.getItem("stockCleared") === "true") {
+                return [];
             }
-            return items;
+            const localStock = JSON.parse(localStorage.getItem("stockItems"));
+            if (localStock !== null) {
+                let items = localStock;
+                if (category && category !== "All") items = items.filter(i => i.category === category);
+                if (search) {
+                    const s = search.toLowerCase();
+                    items = items.filter(i => (i.item_name || "").toLowerCase().includes(s));
+                }
+                return items;
+            }
+            return [];
         });
     },
 
     async createStockItem(payload) {
+        localStorage.removeItem("stockCleared");
         return this.request("/stock", {
             method: "POST",
             body: JSON.stringify(payload)
@@ -347,5 +347,13 @@ const API = {
         return this.request(`/stock/${stockId}`, {
             method: "DELETE"
         }, () => null);
+    },
+
+    async clearAllStock() {
+        localStorage.setItem("stockCleared", "true");
+        localStorage.setItem("stockItems", JSON.stringify([]));
+        return this.request("/stock", {
+            method: "DELETE"
+        }, () => ({ status: "ok" }));
     }
 };

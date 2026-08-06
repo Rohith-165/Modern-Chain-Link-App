@@ -24,6 +24,8 @@ def setup_db():
     Base.metadata.create_all(bind=engine)
     db = TestingSessionLocal()
     init_default_admin(db)
+    from app.services.stock_service import init_default_stock
+    init_default_stock(db, force=True)
     db.close()
     yield
     Base.metadata.drop_all(bind=engine)

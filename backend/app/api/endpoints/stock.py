@@ -34,6 +34,11 @@ def update_stock(
         raise HTTPException(status_code=404, detail="Stock item not found")
     return item
 
+@router.delete("", status_code=status.HTTP_200_OK)
+def delete_all_stock_items(db: Session = Depends(get_db)):
+    deleted_count = stock_service.delete_all_stock(db)
+    return {"status": "ok", "message": f"All {deleted_count} stock items have been deleted.", "deleted_count": deleted_count}
+
 @router.delete("/{stock_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_stock(
     stock_id: int,

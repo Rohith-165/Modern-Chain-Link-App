@@ -2,8 +2,8 @@ from sqlalchemy.orm import Session
 from app.models.stock import StockItem
 from app.schemas.stock import StockCreate, StockUpdate
 
-def init_default_stock(db: Session):
-    if db.query(StockItem).count() == 0:
+def init_default_stock(db: Session, force: bool = False):
+    if force or db.query(StockItem).count() == 0:
         defaults = [
             {"item_name": "TATA Chain Link Fence 2x2 Inch (6 Ft)", "category": "Fence Roll", "unit": "Rolls", "shop_quantity": 25.0, "factory_quantity": 120.0, "reorder_level": 10.0, "price_per_unit": 3500.0},
             {"item_name": "TATA Chain Link Fence 2x2 Inch (5 Ft)", "category": "Fence Roll", "unit": "Rolls", "shop_quantity": 15.0, "factory_quantity": 80.0, "reorder_level": 8.0, "price_per_unit": 2900.0},
@@ -18,7 +18,6 @@ def init_default_stock(db: Session):
         db.commit()
 
 def get_all_stock(db: Session, category: str = None, search: str = None):
-    init_default_stock(db)
     query = db.query(StockItem)
     if category and category != "All":
         query = query.filter(StockItem.category == category)
@@ -57,3 +56,8 @@ def delete_stock_item(db: Session, stock_id: int) -> bool:
     db.delete(item)
     db.commit()
     return True
+
+def delete_all_stock(db: Session) -> int:
+    num_deleted = db.query(StockItem).delete()
+    db.commit()
+    return num_deleted

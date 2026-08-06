@@ -16,6 +16,12 @@ def login_for_access_token(
 ):
     user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
+        # Auto-heal: Ensure default admin and employee accounts are seeded/updated in database
+        from app.core.auth import init_default_admin
+        init_default_admin(db)
+        user = authenticate_user(db, form_data.username, form_data.password)
+
+    if not user:
         log_auth_event(form_data.username, False, "Invalid credentials")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

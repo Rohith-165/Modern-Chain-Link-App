@@ -216,50 +216,10 @@
                 <form id="stockForm" onsubmit="saveStockItem(event)">
                     <input type="hidden" id="stockId">
 
-                    <div class="formGroup">
-                        <label class="formLabel" for="stockItemName">Item Name <span class="text-red">*</span></label>
-                        <input type="text" id="stockItemName" class="formInput" placeholder="e.g. TATA Chain Link 2x2 6ft" required>
-                    </div>
-
-                    <!-- Specification Row 1: Brand & Diamond Size -->
+                    <!-- Row 1: Material Type & Diamond Size -->
                     <div class="formRow">
                         <div class="formGroup">
-                            <label class="formLabel" for="stockBrand"><i class="fa-solid fa-award color-primary"></i> Material Brand</label>
-                            <select id="stockBrand" class="formInput">
-                                <option value="TATA GI Wire">TATA GI Wire</option>
-                                <option value="Micon Wire">Micon Wire</option>
-                                <option value="Local Quality">Local Quality</option>
-                            </select>
-                        </div>
-                        <div class="formGroup">
-                            <label class="formLabel" for="stockDiamondSize"><i class="fa-solid fa-border-all color-primary"></i> Diamond Mesh Size</label>
-                            <select id="stockDiamondSize" class="formInput">
-                                <option value="N/A">Not Applicable</option>
-                                <option value="1 X 1 Inch">1 X 1 Inch</option>
-                                <option value="1.5 X 1.5 Inch">1.5 X 1.5 Inch</option>
-                                <option value="2 X 2 Inch" selected>2 X 2 Inch</option>
-                                <option value="3 X 3 Inch">3 X 3 Inch</option>
-                                <option value="Other">Other</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Specification Row 2: Height & Length in Feet -->
-                    <div class="formRow">
-                        <div class="formGroup">
-                            <label class="formLabel" for="stockHeight"><i class="fa-solid fa-arrows-up-down color-primary"></i> Height (Feet) <span class="text-red">*</span></label>
-                            <input type="number" step="0.1" id="stockHeight" class="formInput" placeholder="e.g. 5.5" min="0.1" value="6">
-                        </div>
-                        <div class="formGroup">
-                            <label class="formLabel" id="stockLengthLabel" for="stockLength"><i class="fa-solid fa-arrows-left-right color-primary"></i> Running Length (Feet) <span class="text-red">*</span></label>
-                            <input type="text" id="stockLength" class="formInput" placeholder="e.g. 100" value="100">
-                        </div>
-                    </div>
-
-                    <!-- Row 3: Category & Storage Location & Unit -->
-                    <div class="formRow">
-                        <div class="formGroup">
-                            <label class="formLabel" for="stockCategory">Category / Material Type</label>
+                            <label class="formLabel" for="stockCategory"><i class="fa-solid fa-boxes-stacked color-primary"></i> Material Type <span class="text-red">*</span></label>
                             <select id="stockCategory" class="formInput" onchange="handleStockCategoryChange()">
                                 <option value="Chain Link Fence">Chain Link Fence</option>
                                 <option value="Barbed Wire">Barbed Wire</option>
@@ -273,32 +233,58 @@
                             </select>
                         </div>
                         <div class="formGroup">
-                            <label class="formLabel" for="stockLocationPlace">Storage Location</label>
+                            <label class="formLabel" for="stockDiamondSize"><i class="fa-solid fa-border-all color-primary"></i> Diamond Size</label>
+                            <select id="stockDiamondSize" class="formInput">
+                                <option value="2 X 2 Inch" selected>2 X 2 Inch</option>
+                                <option value="1 X 1 Inch">1 X 1 Inch</option>
+                                <option value="1.5 X 1.5 Inch">1.5 X 1.5 Inch</option>
+                                <option value="3 X 3 Inch">3 X 3 Inch</option>
+                                <option value="Other">Other</option>
+                                <option value="N/A">Not Applicable</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Row 2: Brand & Height (Feet) -->
+                    <div class="formRow">
+                        <div class="formGroup">
+                            <label class="formLabel" for="stockBrand"><i class="fa-solid fa-award color-primary"></i> Brand</label>
+                            <select id="stockBrand" class="formInput">
+                                <option value="TATA GI Wire">TATA GI Wire</option>
+                                <option value="Micon Wire">Micon Wire</option>
+                                <option value="Local Quality">Local Quality</option>
+                            </select>
+                        </div>
+                        <div class="formGroup">
+                            <label class="formLabel" for="stockHeight"><i class="fa-solid fa-arrows-up-down color-primary"></i> Height (Feet) <span class="text-red">*</span></label>
+                            <input type="number" step="0.1" id="stockHeight" class="formInput" placeholder="e.g. 5.5" min="0.1" value="6">
+                        </div>
+                    </div>
+
+                    <!-- Row 3: Length / Weight & Storage Location -->
+                    <div class="formRow">
+                        <div class="formGroup">
+                            <label class="formLabel" id="stockLengthLabel" for="stockLength"><i class="fa-solid fa-arrows-left-right color-primary"></i> Running Length (Feet) <span class="text-red">*</span></label>
+                            <input type="text" id="stockLength" class="formInput" placeholder="e.g. 100" value="100">
+                        </div>
+                        <div class="formGroup">
+                            <label class="formLabel" for="stockLocationPlace"><i class="fa-solid fa-location-dot color-primary"></i> Storage Location</label>
                             <select id="stockLocationPlace" class="formInput">
                                 <option value="Both">Both (Shop & Factory)</option>
                                 <option value="Shop">Shop Only</option>
                                 <option value="Factory">Factory Only</option>
                             </select>
                         </div>
-                        <div class="formGroup">
-                            <label class="formLabel" for="stockUnit">Unit of Measure</label>
-                            <select id="stockUnit" class="formInput">
-                                <option value="Rolls">Rolls</option>
-                                <option value="Kg">Kg</option>
-                                <option value="Pieces">Pieces</option>
-                                <option value="Sq.Ft">Sq.Ft</option>
-                                <option value="Bundles">Bundles</option>
-                            </select>
-                        </div>
                     </div>
 
+                    <!-- Row 4: Shop Stock & Factory Stock -->
                     <div class="formRow">
                         <div class="formGroup">
-                            <label class="formLabel" for="stockShopQty"><i class="fa-solid fa-store color-blue"></i> Shop Quantity</label>
+                            <label class="formLabel" for="stockShopQty"><i class="fa-solid fa-store color-blue"></i> Shop Stock</label>
                             <input type="number" step="0.1" id="stockShopQty" class="formInput" placeholder="0.0" min="0" value="0">
                         </div>
                         <div class="formGroup">
-                            <label class="formLabel" for="stockFactoryQty"><i class="fa-solid fa-industry color-orange"></i> Factory Quantity</label>
+                            <label class="formLabel" for="stockFactoryQty"><i class="fa-solid fa-industry color-orange"></i> Factory Stock</label>
                             <input type="number" step="0.1" id="stockFactoryQty" class="formInput" placeholder="0.0" min="0" value="0">
                         </div>
                     </div>

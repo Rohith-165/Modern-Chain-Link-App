@@ -196,18 +196,18 @@ function editStockItem(id) {
     const item = allStockItems.find(i => i.id === id);
     if (!item) return;
 
-    document.getElementById("stockId").value = item.id;
-    document.getElementById("stockItemName").value = item.item_name || "";
-    document.getElementById("stockBrand").value = item.brand || "TATA GI Wire";
-    document.getElementById("stockDiamondSize").value = item.diamond_size || "2 X 2 Inch";
-    document.getElementById("stockHeight").value = item.height || "6";
-    document.getElementById("stockLength").value = item.length_ft || "50 Ft";
-    document.getElementById("stockCategory").value = item.category || "Fence Roll";
-    document.getElementById("stockLocationPlace").value = item.location_place || "Both";
-    document.getElementById("stockShopQty").value = item.shop_quantity || 0;
-    document.getElementById("stockFactoryQty").value = item.factory_quantity || 0;
-    document.getElementById("stockUnit").value = item.unit || "Rolls";
-    document.getElementById("stockNotes").value = item.notes || "";
+    if (document.getElementById("stockId")) document.getElementById("stockId").value = item.id;
+    if (document.getElementById("stockItemName")) document.getElementById("stockItemName").value = item.item_name || "";
+    if (document.getElementById("stockBrand")) document.getElementById("stockBrand").value = item.brand || "TATA GI Wire";
+    if (document.getElementById("stockDiamondSize")) document.getElementById("stockDiamondSize").value = item.diamond_size || "2 X 2 Inch";
+    if (document.getElementById("stockHeight")) document.getElementById("stockHeight").value = item.height || "6";
+    if (document.getElementById("stockLength")) document.getElementById("stockLength").value = item.length_ft || "50 Ft";
+    if (document.getElementById("stockCategory")) document.getElementById("stockCategory").value = item.category || "Fence Roll";
+    if (document.getElementById("stockLocationPlace")) document.getElementById("stockLocationPlace").value = item.location_place || "Both";
+    if (document.getElementById("stockShopQty")) document.getElementById("stockShopQty").value = item.shop_quantity || 0;
+    if (document.getElementById("stockFactoryQty")) document.getElementById("stockFactoryQty").value = item.factory_quantity || 0;
+    if (document.getElementById("stockUnit")) document.getElementById("stockUnit").value = item.unit || "Rolls";
+    if (document.getElementById("stockNotes")) document.getElementById("stockNotes").value = item.notes || "";
 
     document.getElementById("stockModalTitle").innerHTML = '<i class="fa-solid fa-pen-to-square color-primary"></i> Edit Stock Item';
     document.getElementById("stockModal").style.display = "flex";
@@ -220,21 +220,26 @@ function closeStockModal() {
 async function saveStockItem(event) {
     event.preventDefault();
 
-    const stockId = document.getElementById("stockId").value;
+    const stockId = document.getElementById("stockId") ? document.getElementById("stockId").value : "";
+    const getVal = (id, fallback = "") => {
+        const el = document.getElementById(id);
+        return el ? el.value : fallback;
+    };
+
     const payload = {
-        item_name: document.getElementById("stockItemName").value.trim(),
-        brand: document.getElementById("stockBrand").value,
-        diamond_size: document.getElementById("stockDiamondSize").value,
-        height: document.getElementById("stockHeight").value,
-        length_ft: document.getElementById("stockLength").value.trim(),
-        category: document.getElementById("stockCategory").value,
-        location_place: document.getElementById("stockLocationPlace").value,
-        shop_quantity: parseFloat(document.getElementById("stockShopQty").value) || 0,
-        factory_quantity: parseFloat(document.getElementById("stockFactoryQty").value) || 0,
-        unit: document.getElementById("stockUnit").value,
+        item_name: getVal("stockItemName").trim(),
+        brand: getVal("stockBrand", "TATA GI Wire"),
+        diamond_size: getVal("stockDiamondSize", "2 X 2 Inch"),
+        height: getVal("stockHeight", "6"),
+        length_ft: getVal("stockLength", "50 Ft").trim(),
+        category: getVal("stockCategory", "Fence Roll"),
+        location_place: getVal("stockLocationPlace", "Both"),
+        shop_quantity: parseFloat(getVal("stockShopQty", "0")) || 0,
+        factory_quantity: parseFloat(getVal("stockFactoryQty", "0")) || 0,
+        unit: getVal("stockUnit", "Rolls"),
         reorder_level: 5.0,
         price_per_unit: 0.0,
-        notes: document.getElementById("stockNotes").value.trim()
+        notes: getVal("stockNotes").trim()
     };
 
     UI.showLoader("Saving stock details...");

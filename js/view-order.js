@@ -16,8 +16,9 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("orderType").addEventListener("change", toggleInstallationFields);
 
     const calculationFields = [
-        "height", "length", "sqftPrice", "barbedWire",
-        "bindingWire", "labour", "travel", "stone"
+        "height", "length", "sqftPrice", "barbedWireKg", "barbedWireRate",
+        "bindingWireKg", "bindingWireRate", "barbedWire", "bindingWire",
+        "labour", "travel", "stone"
     ];
 
     calculationFields.forEach(function (id) {
@@ -76,8 +77,14 @@ async function loadOrder() {
         document.getElementById("length").value = currentOrder.length;
         document.getElementById("sqftPrice").value = currentOrder.sqft_price || currentOrder.sqftPrice;
 
+        document.getElementById("barbedWireKg").value = currentOrder.barbed_wire_kg || currentOrder.barbedWireKg || 0;
+        document.getElementById("barbedWireRate").value = currentOrder.barbed_wire_rate || currentOrder.barbedWireRate || 0;
         document.getElementById("barbedWire").value = currentOrder.barbed_wire || currentOrder.barbedWire || 0;
+
+        document.getElementById("bindingWireKg").value = currentOrder.binding_wire_kg || currentOrder.bindingWireKg || 0;
+        document.getElementById("bindingWireRate").value = currentOrder.binding_wire_rate || currentOrder.bindingWireRate || 0;
         document.getElementById("bindingWire").value = currentOrder.binding_wire || currentOrder.bindingWire || 0;
+
         document.getElementById("labour").value = currentOrder.labour || 0;
         document.getElementById("travel").value = currentOrder.travel || 0;
         document.getElementById("stone").value = currentOrder.stone || 0;
@@ -190,8 +197,26 @@ function calculateAmounts() {
         materialCost = area * sqftPrice;
     }
 
-    const barbedWire = Number(document.getElementById("barbedWire").value) || 0;
-    const bindingWire = Number(document.getElementById("bindingWire").value) || 0;
+    // Barbed Wire calculation (Kg * Rate)
+    const barbedWireKg = Number(document.getElementById("barbedWireKg").value) || 0;
+    const barbedWireRate = Number(document.getElementById("barbedWireRate").value) || 0;
+    const barbedWireCost = (barbedWireKg && barbedWireRate) ? (barbedWireKg * barbedWireRate) : (Number(document.getElementById("barbedWire").value) || 0);
+    document.getElementById("barbedWire").value = barbedWireCost;
+    const barbedTextEl = document.getElementById("barbedWireTotalText");
+    if (barbedTextEl) {
+        barbedTextEl.textContent = "₹" + barbedWireCost.toLocaleString("en-IN", { minimumFractionDigits: 2 });
+    }
+
+    // Binding Wire calculation (Kg * Rate)
+    const bindingWireKg = Number(document.getElementById("bindingWireKg").value) || 0;
+    const bindingWireRate = Number(document.getElementById("bindingWireRate").value) || 0;
+    const bindingWireCost = (bindingWireKg && bindingWireRate) ? (bindingWireKg * bindingWireRate) : (Number(document.getElementById("bindingWire").value) || 0);
+    document.getElementById("bindingWire").value = bindingWireCost;
+    const bindingTextEl = document.getElementById("bindingWireTotalText");
+    if (bindingTextEl) {
+        bindingTextEl.textContent = "₹" + bindingWireCost.toLocaleString("en-IN", { minimumFractionDigits: 2 });
+    }
+
     const labour = Number(document.getElementById("labour").value) || 0;
     const travel = Number(document.getElementById("travel").value) || 0;
     const stone = Number(document.getElementById("stone").value) || 0;
@@ -202,7 +227,7 @@ function calculateAmounts() {
     }
     document.getElementById("amountPaid").value = amountPaid;
 
-    const totalAmount = materialCost + barbedWire + bindingWire + labour + travel + stone;
+    const totalAmount = materialCost + barbedWireCost + bindingWireCost + labour + travel + stone;
     const balanceAmount = Math.max(0, totalAmount - amountPaid);
 
     document.getElementById("area").textContent = area.toFixed(2) + " Sq.ft";
@@ -330,6 +355,14 @@ async function updateOrder(event) {
     UI.showLoader("Updating Order...");
 
     try {
+        const barbedWireKg = Number(document.getElementById("barbedWireKg").value || 0);
+        const barbedWireRate = Number(document.getElementById("barbedWireRate").value || 0);
+        const barbedWireCost = (barbedWireKg && barbedWireRate) ? (barbedWireKg * barbedWireRate) : Number(document.getElementById("barbedWire").value || 0);
+
+        const bindingWireKg = Number(document.getElementById("bindingWireKg").value || 0);
+        const bindingWireRate = Number(document.getElementById("bindingWireRate").value || 0);
+        const bindingWireCost = (bindingWireKg && bindingWireRate) ? (bindingWireKg * bindingWireRate) : Number(document.getElementById("bindingWire").value || 0);
+
         const orderPayload = {
             customer_name: document.getElementById("customerName").value.trim(),
             phone_number: document.getElementById("phoneNumber").value.trim(),
@@ -343,8 +376,12 @@ async function updateOrder(event) {
             height: Number(document.getElementById("height").value || 0),
             length: Number(document.getElementById("length").value || 0),
             sqft_price: Number(document.getElementById("sqftPrice").value || 0),
-            barbed_wire: Number(document.getElementById("barbedWire").value || 0),
-            binding_wire: Number(document.getElementById("bindingWire").value || 0),
+            barbed_wire: barbedWireCost,
+            barbed_wire_kg: barbedWireKg,
+            barbed_wire_rate: barbedWireRate,
+            binding_wire: bindingWireCost,
+            binding_wire_kg: bindingWireKg,
+            binding_wire_rate: bindingWireRate,
             labour: Number(document.getElementById("labour").value || 0),
             travel: Number(document.getElementById("travel").value || 0),
             stone: Number(document.getElementById("stone").value || 0),

@@ -33,7 +33,10 @@ def create_order(db: Session, order_in: OrderCreate, current_user: User = None) 
         # Price per Sq.Ft (Area * Price per Sq.Ft)
         material_cost = area * order_in.sqft_price
 
-    extra_charges = (order_in.barbed_wire or 0) + (order_in.binding_wire or 0) + \
+    barbed_cost = (order_in.barbed_wire_kg or 0) * (order_in.barbed_wire_rate or 0) if (order_in.barbed_wire_kg and order_in.barbed_wire_rate) else (order_in.barbed_wire or 0)
+    binding_cost = (order_in.binding_wire_kg or 0) * (order_in.binding_wire_rate or 0) if (order_in.binding_wire_kg and order_in.binding_wire_rate) else (order_in.binding_wire or 0)
+
+    extra_charges = barbed_cost + binding_cost + \
                     (order_in.labour or 0) + (order_in.travel or 0) + (order_in.stone or 0)
     
     total_amount = material_cost + extra_charges
@@ -54,8 +57,12 @@ def create_order(db: Session, order_in: OrderCreate, current_user: User = None) 
         sqft_price=order_in.sqft_price,
         area=area,
         material_cost=material_cost,
-        barbed_wire=order_in.barbed_wire,
-        binding_wire=order_in.binding_wire,
+        barbed_wire=barbed_cost,
+        barbed_wire_kg=order_in.barbed_wire_kg or 0.0,
+        barbed_wire_rate=order_in.barbed_wire_rate or 0.0,
+        binding_wire=binding_cost,
+        binding_wire_kg=order_in.binding_wire_kg or 0.0,
+        binding_wire_rate=order_in.binding_wire_rate or 0.0,
         labour=order_in.labour,
         travel=order_in.travel,
         stone=order_in.stone,
@@ -141,7 +148,10 @@ def update_order(db: Session, order_id: str, order_in: OrderUpdate, current_user
         # Price per Sq.Ft (Area * Price per Sq.Ft)
         material_cost = area * order_in.sqft_price
 
-    extra_charges = (order_in.barbed_wire or 0) + (order_in.binding_wire or 0) + \
+    barbed_cost = (order_in.barbed_wire_kg or 0) * (order_in.barbed_wire_rate or 0) if (order_in.barbed_wire_kg and order_in.barbed_wire_rate) else (order_in.barbed_wire or 0)
+    binding_cost = (order_in.binding_wire_kg or 0) * (order_in.binding_wire_rate or 0) if (order_in.binding_wire_kg and order_in.binding_wire_rate) else (order_in.binding_wire or 0)
+
+    extra_charges = barbed_cost + binding_cost + \
                     (order_in.labour or 0) + (order_in.travel or 0) + (order_in.stone or 0)
     
     total_amount = material_cost + extra_charges
@@ -162,8 +172,12 @@ def update_order(db: Session, order_id: str, order_in: OrderUpdate, current_user
     db_order.sqft_price = order_in.sqft_price
     db_order.area = area
     db_order.material_cost = material_cost
-    db_order.barbed_wire = order_in.barbed_wire
-    db_order.binding_wire = order_in.binding_wire
+    db_order.barbed_wire = barbed_cost
+    db_order.barbed_wire_kg = order_in.barbed_wire_kg or 0.0
+    db_order.barbed_wire_rate = order_in.barbed_wire_rate or 0.0
+    db_order.binding_wire = binding_cost
+    db_order.binding_wire_kg = order_in.binding_wire_kg or 0.0
+    db_order.binding_wire_rate = order_in.binding_wire_rate or 0.0
     db_order.labour = order_in.labour
     db_order.travel = order_in.travel
     db_order.stone = order_in.stone

@@ -15,7 +15,11 @@ class OrderBase(BaseModel):
     length: float
     sqft_price: float
     barbed_wire: Optional[float] = 0.0
+    barbed_wire_kg: Optional[float] = 0.0
+    barbed_wire_rate: Optional[float] = 0.0
     binding_wire: Optional[float] = 0.0
+    binding_wire_kg: Optional[float] = 0.0
+    binding_wire_rate: Optional[float] = 0.0
     labour: Optional[float] = 0.0
     travel: Optional[float] = 0.0
     stone: Optional[float] = 0.0

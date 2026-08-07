@@ -27,7 +27,11 @@ class Order(Base):
     material_cost = Column(Float, nullable=False)
 
     barbed_wire = Column(Float, default=0.0)
+    barbed_wire_kg = Column(Float, default=0.0)
+    barbed_wire_rate = Column(Float, default=0.0)
     binding_wire = Column(Float, default=0.0)
+    binding_wire_kg = Column(Float, default=0.0)
+    binding_wire_rate = Column(Float, default=0.0)
     labour = Column(Float, default=0.0)
     travel = Column(Float, default=0.0)
     stone = Column(Float, default=0.0)

@@ -386,10 +386,16 @@ body {
     top: 0; left: 0; right: 0; bottom: 0;
     background: rgba(15, 23, 42, 0.6);
     backdrop-filter: blur(4px);
-    z-index: 1000;
+    z-index: 99999 !important;
     align-items: center;
     justify-content: center;
     padding: 20px;
+}
+
+.modal.active, .modal.show, div#stockModal.active, div#stockModal.show {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
 .modalContent {

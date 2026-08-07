@@ -279,8 +279,9 @@ function editStockItem(id) {
 function closeStockModal() {
     const modal = document.getElementById("stockModal");
     if (modal) {
-        modal.style.display = "none";
+        modal.style.cssText = "display: none !important;";
         modal.classList.remove("active");
+        modal.classList.remove("show");
     }
 }
 

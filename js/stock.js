@@ -175,11 +175,6 @@ function renderStockTable() {
                 <strong style="font-size: 1.1rem; color: #0b8f47;">${total} ${item.unit}</strong>
             </td>
             <td>${statusBadge}</td>
-            <td>
-                <button class="btn btn-sm btn-primary" onclick="editStockItem(${item.id})" style="padding: 6px 14px; font-weight: 600; border-radius: 6px;">
-                    Edit
-                </button>
-            </td>
         `;
         tbody.appendChild(tr);
     });

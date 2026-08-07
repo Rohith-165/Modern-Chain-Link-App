@@ -146,9 +146,24 @@ function renderStockTable() {
 
         const tr = document.createElement("tr");
         const categoryStr = item.category || item.item_name || 'General';
-        const isWire = categoryStr.toLowerCase().includes("wire");
-        const lengthOrWeight = item.length_ft ? (isWire ? `${item.length_ft} Kg` : `${item.length_ft} Ft`) : (isWire ? '50 Kg' : '100 Ft');
-        const unit = isWire ? 'Kg' : (item.unit || 'Rolls');
+        const catLower = categoryStr.toLowerCase();
+
+        let unit = 'Ft';
+        let lengthOrWeight = '100 Ft';
+
+        if (catLower.includes("poles")) {
+            unit = 'Pcs';
+            lengthOrWeight = 'Count (Pcs)';
+        } else if (catLower.includes("raw wire") || catLower.includes("coil")) {
+            unit = 'Coils';
+            lengthOrWeight = 'Count (Coils)';
+        } else if (catLower.includes("barbed") || catLower.includes("binding")) {
+            unit = 'Kg';
+            lengthOrWeight = item.length_ft ? `${item.length_ft} Kg` : '50 Kg';
+        } else {
+            unit = 'Ft';
+            lengthOrWeight = item.length_ft ? `${item.length_ft} Ft` : '100 Ft';
+        }
 
         tr.innerHTML = `
             <td><strong style="color: #1e293b; font-size: 0.95rem;">${categoryStr}</strong></td>
@@ -184,7 +199,15 @@ function handleStockCategoryChange() {
     if (!catEl || !labelEl || !inputEl) return;
 
     const val = catEl.value.toLowerCase();
-    if (val.includes("wire")) {
+    if (val.includes("poles")) {
+        labelEl.innerHTML = '<i class="fa-solid fa-cubes color-primary"></i> Integer Quantity (Pcs/Nos) <span class="text-red">*</span>';
+        inputEl.placeholder = "e.g. 50";
+        if (unitEl) unitEl.value = "Pieces";
+    } else if (val.includes("raw wire") || val.includes("coil")) {
+        labelEl.innerHTML = '<i class="fa-solid fa-circle-notch color-primary"></i> Coil Count (Coils) <span class="text-red">*</span>';
+        inputEl.placeholder = "e.g. 10";
+        if (unitEl) unitEl.value = "Bundles";
+    } else if (val.includes("barbed") || val.includes("binding")) {
         labelEl.innerHTML = '<i class="fa-solid fa-weight-hanging color-primary"></i> Weight (Kg) <span class="text-red">*</span>';
         inputEl.placeholder = "e.g. 50";
         if (unitEl) unitEl.value = "Kg";

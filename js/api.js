@@ -335,6 +335,34 @@ const API = {
         };
     },
 
+    async deductStockForOrder(orderPayload) {
+        try {
+            let stockItems = JSON.parse(localStorage.getItem("stockItems")) || [];
+            const matType = (orderPayload.material_type || "").toLowerCase();
+
+            // Search for matching stock item by material category / name
+            const matchIndex = stockItems.findIndex(item => {
+                const cat = (item.category || "").toLowerCase();
+                const name = (item.item_name || "").toLowerCase();
+                return cat.includes(matType) || matType.includes(cat) || name.includes(matType);
+            });
+
+            if (matchIndex !== -1) {
+                let item = stockItems[matchIndex];
+                let shop = parseFloat(item.shop_quantity || 0);
+                let factory = parseFloat(item.factory_quantity || 0);
+                if (shop > 0) {
+                    item.shop_quantity = Math.max(0, shop - 1);
+                } else if (factory > 0) {
+                    item.factory_quantity = Math.max(0, factory - 1);
+                }
+                stockItems[matchIndex] = item;
+                localStorage.setItem("stockItems", JSON.stringify(stockItems));
+                await this.updateStockItem(item.id, item);
+            }
+        } catch (e) {}
+    },
+
     async createOrder(orderPayload) {
         let res = null;
         try {
@@ -370,6 +398,9 @@ const API = {
             orders.unshift(createdOrder);
         }
         localStorage.setItem("orders", JSON.stringify(orders));
+
+        // Automatically update stock inventory for created order material
+        await this.deductStockForOrder(createdOrder);
 
         return createdOrder;
     },

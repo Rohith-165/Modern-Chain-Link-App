@@ -34,16 +34,35 @@ def update_stock(
         raise HTTPException(status_code=404, detail="Stock item not found")
     return item
 
+from app.core.auth import get_current_user_optional
+from app.models.user import User
+
 @router.delete("", status_code=status.HTTP_200_OK)
-def delete_all_stock_items(db: Session = Depends(get_db)):
+def delete_all_stock_items(
+    passcode: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+    current_user: Optional[User] = Depends(get_current_user_optional)
+):
+    if passcode != "modern@123" and (not current_user or current_user.role != "Admin"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin authorization required to clear stock inventory."
+        )
     deleted_count = stock_service.delete_all_stock(db)
     return {"status": "ok", "message": f"All {deleted_count} stock items have been deleted.", "deleted_count": deleted_count}
 
 @router.delete("/{stock_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_stock(
     stock_id: int,
-    db: Session = Depends(get_db)
+    passcode: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+    current_user: Optional[User] = Depends(get_current_user_optional)
 ):
+    if passcode != "modern@123" and (not current_user or current_user.role != "Admin"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin authorization required to delete stock items."
+        )
     success = stock_service.delete_stock_item(db, stock_id)
     if not success:
         raise HTTPException(status_code=404, detail="Stock item not found")

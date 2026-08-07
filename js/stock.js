@@ -248,12 +248,28 @@ async function saveStockItem(event) {
     }
 }
 
+function verifyAdminAccess() {
+    const adminPass = prompt("🔐 SECURITY AUTHORIZATION REQUIRED\n\nEnter Admin Password to authorize deletion:");
+    if (!adminPass) {
+        UI.warning("Deletion cancelled. Security access code required.");
+        return null;
+    }
+    if (adminPass.trim() !== "modern@123") {
+        UI.error("🚫 Access Denied! Invalid Admin Password. You do not have authorization to delete stock.");
+        return null;
+    }
+    return adminPass.trim();
+}
+
 async function confirmDeleteStock(id) {
+    const passcode = verifyAdminAccess();
+    if (!passcode) return;
+
     if (!confirm("Are you sure you want to delete this stock item?")) return;
 
     UI.showLoader("Deleting stock item...");
     try {
-        await API.deleteStockItem(id);
+        await API.deleteStockItem(id, passcode);
         UI.hideLoader();
         UI.success("Stock item deleted!");
         await loadStockData();
@@ -264,11 +280,14 @@ async function confirmDeleteStock(id) {
 }
 
 async function confirmDeleteAllStock() {
+    const passcode = verifyAdminAccess();
+    if (!passcode) return;
+
     if (!confirm("⚠️ Are you sure you want to DELETE ALL STOCK ITEMS? This will clear all shop and factory inventory!")) return;
 
     UI.showLoader("Clearing all stock items...");
     try {
-        await API.clearAllStock();
+        await API.clearAllStock(passcode);
         UI.hideLoader();
         UI.success("All stock items have been deleted!");
         await loadStockData();

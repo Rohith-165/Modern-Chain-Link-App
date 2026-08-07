@@ -28,6 +28,6 @@ def test_create_and_update_stock(client):
     assert update_res.json()["shop_quantity"] == 75.0
     assert update_res.json()["factory_quantity"] == 450.0
 
-    # Delete
-    del_res = client.delete(f"/api/v1/stock/{stock_id}")
+    # Delete (Requires admin passcode)
+    del_res = client.delete(f"/api/v1/stock/{stock_id}?passcode=modern@123")
     assert del_res.status_code == 204

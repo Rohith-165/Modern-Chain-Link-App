@@ -499,9 +499,9 @@ const API = {
         return res || stockItems[idx] || { id: stockId, ...payload };
     },
 
-    async deleteStockItem(stockId) {
+    async deleteStockItem(stockId, passcode = "") {
         try {
-            await this.request(`/stock/${stockId}`, { method: "DELETE" }, () => null);
+            await this.request(`/stock/${stockId}?passcode=${encodeURIComponent(passcode)}`, { method: "DELETE" }, () => null);
         } catch (e) {}
 
         let stockItems = JSON.parse(localStorage.getItem("stockItems")) || [];
@@ -510,9 +510,9 @@ const API = {
         return { status: "ok" };
     },
 
-    async clearAllStock() {
+    async clearAllStock(passcode = "") {
         try {
-            await this.request("/stock", { method: "DELETE" }, () => null);
+            await this.request(`/stock?passcode=${encodeURIComponent(passcode)}`, { method: "DELETE" }, () => null);
         } catch (e) {}
 
         localStorage.setItem("stockCleared", "true");

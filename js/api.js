@@ -131,27 +131,35 @@ const API = {
 
     // 2. DASHBOARD
     async getDashboardSummary() {
-        return this.request("/dashboard/summary", { method: "GET" }, () => {
-            const orders = JSON.parse(localStorage.getItem("orders")) || [];
-            return {
-                total_orders: orders.length,
-                pending_orders: orders.filter(o => o.status === "Pending").length,
-                processing_orders: orders.filter(o => o.status === "Processing").length,
-                delivered_orders: orders.filter(o => o.status === "Delivered").length,
-                total_revenue: orders.reduce((s, o) => s + Number(o.totalAmount || 0), 0),
-                total_paid: orders.reduce((s, o) => s + Number(o.amountPaid || 0), 0),
-                total_balance: orders.reduce((s, o) => s + Number(o.balanceAmount || 0), 0),
-                total_customers: new Set(orders.map(o => o.phoneNumber)).size,
-                recent_orders: orders.slice(-5).reverse().map(o => ({
-                    order_id: o.orderId,
-                    customer_name: o.customerName,
-                    phone_number: o.phoneNumber,
-                    total_amount: o.totalAmount,
-                    balance_amount: o.balanceAmount,
-                    status: o.status
-                }))
-            };
-        });
+        let serverSummary = null;
+        try {
+            serverSummary = await this.request("/dashboard/summary", { method: "GET" }, () => null);
+        } catch (e) {}
+
+        const orders = await this.getOrders("All");
+
+        const totalOrders = orders.length;
+        const pendingOrders = orders.filter(o => o.status === "Pending").length;
+        const processingOrders = orders.filter(o => o.status === "Processing").length;
+        const deliveredOrders = orders.filter(o => o.status === "Delivered").length;
+
+        const totalRevenue = orders.reduce((sum, o) => sum + Number(o.total_amount || o.totalAmount || 0), 0);
+        const totalBalance = orders.reduce((sum, o) => sum + Number(o.balance_amount || o.balanceAmount || 0), 0);
+        const totalPaid = totalRevenue - totalBalance;
+
+        const recentOrders = orders.slice(0, 5);
+
+        return {
+            total_orders: totalOrders,
+            pending_orders: pendingOrders,
+            processing_orders: processingOrders,
+            delivered_orders: deliveredOrders,
+            total_revenue: totalRevenue,
+            total_paid: totalPaid,
+            total_balance: totalBalance,
+            total_customers: new Set(orders.map(o => o.phone_number || o.phoneNumber)).size,
+            recent_orders: recentOrders
+        };
     },
 
     // 3. CUSTOMERS

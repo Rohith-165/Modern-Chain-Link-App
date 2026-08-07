@@ -145,46 +145,61 @@ function renderStockTable() {
         }
 
         const tr = document.createElement("tr");
-        const heightBadge = (item.height && item.height !== "N/A") ? `<span class="badge" style="background:#e0e7ff; color:#3730a3; margin-right:4px;">${item.height} Ft</span>` : '';
-        const lengthBadge = item.length_ft ? `<span class="badge" style="background:#e0f2fe; color:#0369a1; margin-right:4px;">Length: ${item.length_ft}</span>` : '';
-        const diamondBadge = (item.diamond_size && item.diamond_size !== "N/A") ? `<span class="badge" style="background:#fae8ff; color:#86198f; margin-right:4px;">${item.diamond_size}</span>` : '';
-        const brandBadge = item.brand ? `<span class="badge" style="background:#fef3c7; color:#92400e; margin-right:4px;">${item.brand}</span>` : '';
-        const locationBadge = item.location_place ? `<span class="badge" style="background:#dcfce7; color:#166534;">${item.location_place}</span>` : '';
+        const categoryStr = item.category || item.item_name || 'General';
+        const isWire = categoryStr.toLowerCase().includes("wire");
+        const lengthOrWeight = item.length_ft ? (isWire ? `${item.length_ft} Kg` : `${item.length_ft} Ft`) : (isWire ? '50 Kg' : '100 Ft');
+        const unit = isWire ? 'Kg' : (item.unit || 'Rolls');
 
         tr.innerHTML = `
-            <td>
-                <div style="font-weight: 700; color: #1e293b; font-size: 1rem;">${item.item_name}</div>
-                <div style="margin-top: 4px; font-size: 0.8rem;">
-                    ${heightBadge} ${lengthBadge} ${diamondBadge} ${brandBadge} ${locationBadge}
-                </div>
-                <div style="font-size: 0.78rem; color: #64748b; margin-top: 2px;">${item.notes || 'Standard specifications'}</div>
-            </td>
-            <td><span class="categoryBadge">${item.category || 'General'}</span></td>
+            <td><strong style="color: #1e293b; font-size: 0.95rem;">${categoryStr}</strong></td>
+            <td><span class="badge" style="background:#fae8ff; color:#86198f;">${item.diamond_size || 'N/A'}</span></td>
+            <td><span class="badge" style="background:#fef3c7; color:#92400e;">${item.brand || 'TATA GI Wire'}</span></td>
+            <td><span class="badge" style="background:#e0e7ff; color:#3730a3;">${item.height && item.height !== 'N/A' ? item.height + ' Ft' : 'N/A'}</span></td>
+            <td><span class="badge" style="background:#e0f2fe; color:#0369a1; font-weight:600;">${lengthOrWeight}</span></td>
             <td>
                 <div class="stock-qty-pill">
                     <span class="location-badge badge-shop"><i class="fa-solid fa-store"></i> Shop</span>
-                    <span class="stock-qty-val" style="color: #0284c7;">${shop} ${item.unit}</span>
+                    <span class="stock-qty-val" style="color: #0284c7;">${shop} ${unit}</span>
                 </div>
             </td>
             <td>
                 <div class="stock-qty-pill">
                     <span class="location-badge badge-factory"><i class="fa-solid fa-industry"></i> Factory</span>
-                    <span class="stock-qty-val" style="color: #d97706;">${factory} ${item.unit}</span>
+                    <span class="stock-qty-val" style="color: #d97706;">${factory} ${unit}</span>
                 </div>
             </td>
             <td>
-                <strong style="font-size: 1.1rem; color: #0b8f47;">${total} ${item.unit}</strong>
+                <strong style="font-size: 1.1rem; color: #0b8f47;">${total} ${unit}</strong>
             </td>
-            <td>${statusBadge}</td>
         `;
         tbody.appendChild(tr);
     });
+}
+
+function handleStockCategoryChange() {
+    const catEl = document.getElementById("stockCategory");
+    const labelEl = document.getElementById("stockLengthLabel");
+    const inputEl = document.getElementById("stockLength");
+    const unitEl = document.getElementById("stockUnit");
+    if (!catEl || !labelEl || !inputEl) return;
+
+    const val = catEl.value.toLowerCase();
+    if (val.includes("wire")) {
+        labelEl.innerHTML = '<i class="fa-solid fa-weight-hanging color-primary"></i> Weight (Kg) <span class="text-red">*</span>';
+        inputEl.placeholder = "e.g. 50";
+        if (unitEl) unitEl.value = "Kg";
+    } else {
+        labelEl.innerHTML = '<i class="fa-solid fa-arrows-left-right color-primary"></i> Running Length (Feet) <span class="text-red">*</span>';
+        inputEl.placeholder = "e.g. 100";
+        if (unitEl) unitEl.value = "Rolls";
+    }
 }
 
 function openAddStockModal() {
     document.getElementById("stockForm").reset();
     document.getElementById("stockId").value = "";
     document.getElementById("stockModalTitle").innerHTML = '<i class="fa-solid fa-plus color-primary"></i> Add New Stock Item';
+    handleStockCategoryChange();
     document.getElementById("stockModal").style.display = "flex";
 }
 
@@ -197,14 +212,15 @@ function editStockItem(id) {
     if (document.getElementById("stockBrand")) document.getElementById("stockBrand").value = item.brand || "TATA GI Wire";
     if (document.getElementById("stockDiamondSize")) document.getElementById("stockDiamondSize").value = item.diamond_size || "2 X 2 Inch";
     if (document.getElementById("stockHeight")) document.getElementById("stockHeight").value = item.height || "6";
-    if (document.getElementById("stockLength")) document.getElementById("stockLength").value = item.length_ft || "50 Ft";
-    if (document.getElementById("stockCategory")) document.getElementById("stockCategory").value = item.category || "Fence Roll";
+    if (document.getElementById("stockLength")) document.getElementById("stockLength").value = item.length_ft || "100";
+    if (document.getElementById("stockCategory")) document.getElementById("stockCategory").value = item.category || "Chain Link Fence";
     if (document.getElementById("stockLocationPlace")) document.getElementById("stockLocationPlace").value = item.location_place || "Both";
     if (document.getElementById("stockShopQty")) document.getElementById("stockShopQty").value = item.shop_quantity || 0;
     if (document.getElementById("stockFactoryQty")) document.getElementById("stockFactoryQty").value = item.factory_quantity || 0;
     if (document.getElementById("stockUnit")) document.getElementById("stockUnit").value = item.unit || "Rolls";
     if (document.getElementById("stockNotes")) document.getElementById("stockNotes").value = item.notes || "";
 
+    handleStockCategoryChange();
     document.getElementById("stockModalTitle").innerHTML = '<i class="fa-solid fa-pen-to-square color-primary"></i> Edit Stock Item';
     document.getElementById("stockModal").style.display = "flex";
 }
@@ -222,13 +238,16 @@ async function saveStockItem(event) {
         return el ? el.value : fallback;
     };
 
+    const cat = getVal("stockCategory", "Chain Link Fence");
+    const itemName = `${getVal("stockBrand", "TATA GI Wire")} ${cat} ${getVal("stockHeight", "6")}ft`;
+
     const payload = {
-        item_name: getVal("stockItemName").trim(),
+        item_name: itemName,
         brand: getVal("stockBrand", "TATA GI Wire"),
         diamond_size: getVal("stockDiamondSize", "2 X 2 Inch"),
         height: getVal("stockHeight", "6"),
-        length_ft: getVal("stockLength", "50 Ft").trim(),
-        category: getVal("stockCategory", "Fence Roll"),
+        length_ft: getVal("stockLength", "100").trim(),
+        category: cat,
         location_place: getVal("stockLocationPlace", "Both"),
         shop_quantity: parseFloat(getVal("stockShopQty", "0")) || 0,
         factory_quantity: parseFloat(getVal("stockFactoryQty", "0")) || 0,
@@ -315,30 +334,32 @@ function exportStockToExcel() {
     try {
         const data = allStockItems.map((item, idx) => ({
             "S.No": idx + 1,
-            "Item Name": item.item_name,
-            "Category / Type": item.category,
-            "Height (Ft)": item.height || "N/A",
-            "Diamond Mesh Size": item.diamond_size || "N/A",
-            "Material Brand": item.brand || "TATA GI Wire",
+            "Material Type": item.category || item.item_name,
+            "Diamond Size": item.diamond_size || "N/A",
+            "Brand": item.brand || "TATA GI Wire",
+            "Height (Feet)": item.height || "N/A",
+            "Running Length (Ft) / Weight (Kg)": item.length_ft || "N/A",
             "Storage Location": item.location_place || "Both",
             "Shop Quantity": item.shop_quantity,
             "Factory Quantity": item.factory_quantity,
-            "Total Available Quantity": (parseFloat(item.shop_quantity || 0) + parseFloat(item.factory_quantity || 0)),
+            "Total Stock": (parseFloat(item.shop_quantity || 0) + parseFloat(item.factory_quantity || 0)),
             "Unit": item.unit,
-            "Low Stock Reorder Level": item.reorder_level,
-            "Status": (parseFloat(item.shop_quantity || 0) + parseFloat(item.factory_quantity || 0)) <= item.reorder_level ? "LOW STOCK" : "IN STOCK",
             "Notes": item.notes || ""
         }));
 
         if (typeof XLSX !== "undefined") {
             const worksheet = XLSX.utils.json_to_sheet(data);
             const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Shop & Factory Stock");
-
-            const colWidths = [
-                { wch: 6 },
-                { wch: 35 },
-                { wch: 15 },
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Stock Inventory");
+            XLSX.writeFile(workbook, `Stock_Inventory_${new Date().toISOString().split('T')[0]}.xlsx`);
+            UI.success("Stock inventory exported to Excel!");
+        } else {
+            UI.error("Excel export library not loaded");
+        }
+    } catch (err) {
+        UI.error("Failed to export Excel: " + err.message);
+    }
+}
                 { wch: 15 },
                 { wch: 16 },
                 { wch: 22 },

@@ -148,12 +148,14 @@
                     <table class="ordersTable">
                         <thead>
                             <tr>
-                                <th>Item Specifications</th>
-                                <th>Category / Type</th>
+                                <th>Material Type</th>
+                                <th>Diamond Size</th>
+                                <th>Brand</th>
+                                <th>Height (Feet)</th>
+                                <th>Length (Ft) / Weight (Kg)</th>
                                 <th>🏪 Shop Stock</th>
                                 <th>🏭 Factory Stock</th>
                                 <th>Total Stock</th>
-                                <th>Status</th>
                             </tr>
                         </thead>
                         <tbody id="stockTableBody">
@@ -261,7 +263,7 @@
                             </select>
                         </div>
                         <div class="formGroup">
-                            <label class="formLabel" for="stockLength"><i class="fa-solid fa-arrows-left-right color-primary"></i> Running Length (Feet) <span class="text-red">*</span></label>
+                            <label class="formLabel" id="stockLengthLabel" for="stockLength"><i class="fa-solid fa-arrows-left-right color-primary"></i> Running Length (Feet) <span class="text-red">*</span></label>
                             <input type="text" id="stockLength" class="formInput" placeholder="e.g. 100" value="100">
                         </div>
                     </div>
@@ -270,7 +272,7 @@
                     <div class="formRow">
                         <div class="formGroup">
                             <label class="formLabel" for="stockCategory">Category / Material Type</label>
-                            <select id="stockCategory" class="formInput">
+                            <select id="stockCategory" class="formInput" onchange="handleStockCategoryChange()">
                                 <option value="Chain Link Fence">Chain Link Fence</option>
                                 <option value="Barbed Wire">Barbed Wire</option>
                                 <option value="15mm PVC W.mesh">15mm PVC W.mesh</option>

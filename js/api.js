@@ -197,86 +197,163 @@ const API = {
     },
 
     // 4. ORDERS
+    // 4. ORDERS
     async getOrders(status = "All", search = "") {
         const params = new URLSearchParams();
         if (status && status !== "All") params.append("status", status);
         if (search) params.append("search", search);
         const query = params.toString() ? `?${params.toString()}` : "";
 
-        return this.request(`/orders${query}`, { method: "GET" }, () => {
+        try {
+            const serverOrders = await this.request(`/orders${query}`, { method: "GET" }, () => null);
+            let localOrders = JSON.parse(localStorage.getItem("orders")) || [];
+
+            let map = new Map();
+            if (Array.isArray(serverOrders) && serverOrders.length > 0) {
+                serverOrders.forEach(o => map.set(o.order_id || o.orderId, o));
+                // Update local storage cache
+                localStorage.setItem("orders", JSON.stringify(Array.from(map.values())));
+            } else {
+                localOrders.forEach(o => map.set(o.order_id || o.orderId, o));
+            }
+
+            let combined = Array.from(map.values());
+
+            if (status !== "All") {
+                combined = combined.filter(o => o.status === status);
+            }
+            if (search) {
+                const s = search.toLowerCase();
+                combined = combined.filter(o =>
+                    (o.order_id || o.orderId || "").toLowerCase().includes(s) ||
+                    (o.customer_name || o.customerName || "").toLowerCase().includes(s) ||
+                    (o.phone_number || o.phoneNumber || "").toLowerCase().includes(s)
+                );
+            }
+
+            return combined.map(o => ({
+                order_id: o.order_id || o.orderId,
+                customer_name: o.customer_name || o.customerName,
+                phone_number: o.phone_number || o.phoneNumber,
+                order_type: o.order_type || o.orderType,
+                total_amount: o.total_amount || o.totalAmount,
+                balance_amount: o.balance_amount || o.balanceAmount,
+                status: o.status
+            }));
+        } catch (err) {
             let orders = JSON.parse(localStorage.getItem("orders")) || [];
             if (status !== "All") orders = orders.filter(o => o.status === status);
             if (search) {
                 const s = search.toLowerCase();
                 orders = orders.filter(o =>
-                    (o.orderId || "").toLowerCase().includes(s) ||
-                    (o.customerName || "").toLowerCase().includes(s) ||
-                    (o.phoneNumber || "").toLowerCase().includes(s)
+                    (o.order_id || o.orderId || "").toLowerCase().includes(s) ||
+                    (o.customer_name || o.customerName || "").toLowerCase().includes(s) ||
+                    (o.phone_number || o.phoneNumber || "").toLowerCase().includes(s)
                 );
             }
-            return orders.map(o => ({
-                order_id: o.orderId,
-                customer_name: o.customerName,
-                phone_number: o.phoneNumber,
-                order_type: o.orderType,
-                total_amount: o.totalAmount,
-                balance_amount: o.balanceAmount,
-                status: o.status
-            }));
-        });
+            return orders;
+        }
     },
 
     async getOrder(orderId) {
-        return this.request(`/orders/${orderId}`, { method: "GET" }, () => {
-            const orders = JSON.parse(localStorage.getItem("orders")) || [];
-            const o = orders.find(item => item.orderId === orderId);
-            if (!o) return null;
-            return {
-                order_id: o.orderId,
-                customer_name: o.customerName,
-                phone_number: o.phoneNumber,
-                address: o.address,
-                order_type: o.orderType,
-                material_type: o.materialType,
-                diamond_size: o.diamondSize,
-                brand: o.brand,
-                height: o.height,
-                length: o.length,
-                sqft_price: o.sqftPrice,
-                area: o.area,
-                material_cost: o.materialCost,
-                barbed_wire: o.barbedWire,
-                binding_wire: o.bindingWire,
-                labour: o.labour,
-                travel: o.travel,
-                stone: o.stone,
-                total_amount: o.totalAmount,
-                amount_paid: o.amountPaid,
-                balance_amount: o.balanceAmount,
-                status: o.status,
-                payments: (o.payments || []).map(p => ({
-                    id: p.id,
-                    amount: p.amount,
-                    payment_mode: p.mode || p.payment_mode,
-                    notes: p.notes,
-                    created_at: p.date || p.created_at
-                }))
-            };
-        });
+        try {
+            const serverOrder = await this.request(`/orders/${orderId}`, { method: "GET" }, () => null);
+            if (serverOrder) return serverOrder;
+        } catch (e) {}
+
+        const orders = JSON.parse(localStorage.getItem("orders")) || [];
+        const o = orders.find(item => (item.order_id || item.orderId) === orderId);
+        if (!o) return null;
+        return {
+            order_id: o.order_id || o.orderId,
+            customer_name: o.customer_name || o.customerName,
+            phone_number: o.phone_number || o.phoneNumber,
+            address: o.address,
+            order_type: o.order_type || o.orderType,
+            material_type: o.material_type || o.materialType,
+            diamond_size: o.diamond_size || o.diamondSize,
+            brand: o.brand,
+            ordered_date: o.ordered_date || o.orderedDate,
+            delivery_date: o.delivery_date || o.deliveryDate,
+            height: o.height,
+            length: o.length,
+            sqft_price: o.sqft_price || o.sqftPrice,
+            area: o.area,
+            material_cost: o.material_cost || o.materialCost,
+            barbed_wire: o.barbed_wire || o.barbedWire,
+            binding_wire: o.binding_wire || o.bindingWire,
+            labour: o.labour,
+            travel: o.travel,
+            stone: o.stone,
+            total_amount: o.total_amount || o.totalAmount,
+            amount_paid: o.amount_paid || o.amountPaid,
+            balance_amount: o.balance_amount || o.balanceAmount,
+            status: o.status,
+            payments: (o.payments || []).map(p => ({
+                id: p.id,
+                amount: p.amount,
+                payment_mode: p.payment_mode || p.mode,
+                notes: p.notes,
+                created_at: p.created_at || p.date
+            }))
+        };
     },
 
     async createOrder(orderPayload) {
-        return this.request("/orders", {
-            method: "POST",
-            body: JSON.stringify(orderPayload)
-        }, () => null);
+        let res = null;
+        try {
+            res = await this.request("/orders", {
+                method: "POST",
+                body: JSON.stringify(orderPayload)
+            }, () => null);
+        } catch (e) {}
+
+        let orders = JSON.parse(localStorage.getItem("orders")) || [];
+        const year = new Date().getFullYear();
+        const generatedId = `MCLC-${year}-${String(orders.length + 1).padStart(4, '0')}`;
+
+        const createdOrder = res || {
+            id: Date.now(),
+            order_id: generatedId,
+            orderId: generatedId,
+            ...orderPayload,
+            created_at: new Date().toISOString(),
+            payments: orderPayload.amount_paid > 0 ? [{
+                id: 1,
+                amount: orderPayload.amount_paid,
+                payment_mode: "Advance Cash/UPI",
+                created_at: new Date().toISOString()
+            }] : []
+        };
+
+        const existingIdx = orders.findIndex(o => (o.order_id || o.orderId) === (createdOrder.order_id || createdOrder.orderId));
+        if (existingIdx !== -1) {
+            orders[existingIdx] = createdOrder;
+        } else {
+            orders.unshift(createdOrder);
+        }
+        localStorage.setItem("orders", JSON.stringify(orders));
+
+        return createdOrder;
     },
 
     async updateOrder(orderId, orderPayload) {
-        return this.request(`/orders/${orderId}`, {
-            method: "PUT",
-            body: JSON.stringify(orderPayload)
-        }, () => null);
+        let res = null;
+        try {
+            res = await this.request(`/orders/${orderId}`, {
+                method: "PUT",
+                body: JSON.stringify(orderPayload)
+            }, () => null);
+        } catch (e) {}
+
+        let orders = JSON.parse(localStorage.getItem("orders")) || [];
+        const idx = orders.findIndex(o => (o.order_id || o.orderId) === orderId);
+        if (idx !== -1) {
+            orders[idx] = { ...orders[idx], ...orderPayload, ...(res || {}) };
+            localStorage.setItem("orders", JSON.stringify(orders));
+        }
+
+        return res || { order_id: orderId, ...orderPayload };
     },
 
     async getOrderHistory(orderId) {
@@ -285,10 +362,34 @@ const API = {
 
     // 5. PAYMENTS
     async addPayment(orderId, paymentPayload) {
-        return this.request(`/payments/${orderId}`, {
-            method: "POST",
-            body: JSON.stringify(paymentPayload)
-        }, () => null);
+        let res = null;
+        try {
+            res = await this.request(`/payments/${orderId}`, {
+                method: "POST",
+                body: JSON.stringify(paymentPayload)
+            }, () => null);
+        } catch (e) {}
+
+        let orders = JSON.parse(localStorage.getItem("orders")) || [];
+        const idx = orders.findIndex(o => (o.order_id || o.orderId) === orderId);
+        if (idx !== -1) {
+            if (!orders[idx].payments) orders[idx].payments = [];
+            orders[idx].payments.push(res || {
+                id: Date.now(),
+                amount: paymentPayload.amount,
+                payment_mode: paymentPayload.payment_mode,
+                notes: paymentPayload.notes,
+                created_at: new Date().toISOString()
+            });
+            const paidSum = orders[idx].payments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+            orders[idx].amount_paid = paidSum;
+            orders[idx].amountPaid = paidSum;
+            orders[idx].balance_amount = Math.max(0, (orders[idx].total_amount || orders[idx].totalAmount || 0) - paidSum);
+            orders[idx].balanceAmount = orders[idx].balance_amount;
+            localStorage.setItem("orders", JSON.stringify(orders));
+        }
+
+        return res || { status: "ok" };
     },
 
     // 6. COMPANY PROFILE
@@ -310,50 +411,97 @@ const API = {
         if (category && category !== "All") params.append("category", category);
         if (search) params.append("search", search);
         const query = params.toString() ? `?${params.toString()}` : "";
-        return this.request(`/stock${query}`, { method: "GET" }, () => {
-            if (localStorage.getItem("stockCleared") === "true") {
-                return [];
-            }
-            const localStock = JSON.parse(localStorage.getItem("stockItems"));
-            if (localStock !== null) {
-                let items = localStock;
-                if (category && category !== "All") items = items.filter(i => i.category === category);
-                if (search) {
-                    const s = search.toLowerCase();
-                    items = items.filter(i => (i.item_name || "").toLowerCase().includes(s));
+
+        try {
+            const serverStock = await this.request(`/stock${query}`, { method: "GET" }, () => null);
+            if (Array.isArray(serverStock)) {
+                if (serverStock.length > 0) {
+                    localStorage.removeItem("stockCleared");
+                    localStorage.setItem("stockItems", JSON.stringify(serverStock));
+                    return serverStock;
+                } else if (localStorage.getItem("stockCleared") === "true") {
+                    return [];
                 }
-                return items;
             }
+        } catch (e) {}
+
+        if (localStorage.getItem("stockCleared") === "true") {
             return [];
-        });
+        }
+        let localStock = JSON.parse(localStorage.getItem("stockItems")) || [
+            { id: 1, item_name: "TATA Chain Link Fence 2x2 (6 Ft)", category: "Fence Roll", unit: "Rolls", shop_quantity: 25, factory_quantity: 120, reorder_level: 10, price_per_unit: 3500 },
+            { id: 2, item_name: "TATA Chain Link Fence 2x2 (5 Ft)", category: "Fence Roll", unit: "Rolls", shop_quantity: 15, factory_quantity: 80, reorder_level: 8, price_per_unit: 2900 },
+            { id: 3, item_name: "Micon Barbed Wire (12 Gauge)", category: "Barbed Wire", unit: "Kg", shop_quantity: 150, factory_quantity: 650, reorder_level: 50, price_per_unit: 95 },
+            { id: 4, item_name: "Binding Wire (14 Gauge)", category: "Binding Wire", unit: "Kg", shop_quantity: 45, factory_quantity: 200, reorder_level: 20, price_per_unit: 85 },
+            { id: 5, item_name: "Stone Poles 7 Feet", category: "Poles", unit: "Pieces", shop_quantity: 60, factory_quantity: 300, reorder_level: 15, price_per_unit: 420 },
+            { id: 6, item_name: "Galvanized GI Wire Raw Coil", category: "Raw Wire", unit: "Kg", shop_quantity: 500, factory_quantity: 3500, reorder_level: 200, price_per_unit: 72 }
+        ];
+
+        if (category && category !== "All") localStock = localStock.filter(i => i.category === category);
+        if (search) {
+            const s = search.toLowerCase();
+            localStock = localStock.filter(i => (i.item_name || "").toLowerCase().includes(s));
+        }
+        return localStock;
     },
 
     async createStockItem(payload) {
         localStorage.removeItem("stockCleared");
-        return this.request("/stock", {
-            method: "POST",
-            body: JSON.stringify(payload)
-        }, () => null);
+        let res = null;
+        try {
+            res = await this.request("/stock", {
+                method: "POST",
+                body: JSON.stringify(payload)
+            }, () => null);
+        } catch (e) {}
+
+        let stockItems = JSON.parse(localStorage.getItem("stockItems")) || [];
+        const newItem = res || { id: Date.now(), ...payload };
+        stockItems.push(newItem);
+        localStorage.setItem("stockItems", JSON.stringify(stockItems));
+
+        return newItem;
     },
 
     async updateStockItem(stockId, payload) {
-        return this.request(`/stock/${stockId}`, {
-            method: "PUT",
-            body: JSON.stringify(payload)
-        }, () => null);
+        let res = null;
+        try {
+            res = await this.request(`/stock/${stockId}`, {
+                method: "PUT",
+                body: JSON.stringify(payload)
+            }, () => null);
+        } catch (e) {}
+
+        let stockItems = JSON.parse(localStorage.getItem("stockItems")) || [];
+        const idx = stockItems.findIndex(i => i.id == stockId);
+        if (idx !== -1) {
+            stockItems[idx] = { ...stockItems[idx], ...payload, ...(res || {}) };
+        } else {
+            stockItems.push(res || { id: stockId, ...payload });
+        }
+        localStorage.setItem("stockItems", JSON.stringify(stockItems));
+
+        return res || stockItems[idx] || { id: stockId, ...payload };
     },
 
     async deleteStockItem(stockId) {
-        return this.request(`/stock/${stockId}`, {
-            method: "DELETE"
-        }, () => null);
+        try {
+            await this.request(`/stock/${stockId}`, { method: "DELETE" }, () => null);
+        } catch (e) {}
+
+        let stockItems = JSON.parse(localStorage.getItem("stockItems")) || [];
+        stockItems = stockItems.filter(i => i.id != stockId);
+        localStorage.setItem("stockItems", JSON.stringify(stockItems));
+        return { status: "ok" };
     },
 
     async clearAllStock() {
+        try {
+            await this.request("/stock", { method: "DELETE" }, () => null);
+        } catch (e) {}
+
         localStorage.setItem("stockCleared", "true");
         localStorage.setItem("stockItems", JSON.stringify([]));
-        return this.request("/stock", {
-            method: "DELETE"
-        }, () => ({ status: "ok" }));
+        return { status: "ok" };
     }
 };

@@ -45,7 +45,8 @@ function updateSummaryKPIs() {
 
     document.getElementById("totalShopStock").textContent = totalShop.toLocaleString('en-IN') + " Units";
     document.getElementById("totalFactoryStock").textContent = totalFactory.toLocaleString('en-IN') + " Units";
-    document.getElementById("lowStockCount").textContent = lowStockCount;
+    const lowEl = document.getElementById("lowStockCount");
+    if (lowEl) lowEl.textContent = lowStockCount;
 }
 
 function filterByLocation(location) {

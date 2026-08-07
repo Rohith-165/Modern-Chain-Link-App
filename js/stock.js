@@ -219,37 +219,61 @@ function handleStockCategoryChange() {
 }
 
 function openAddStockModal() {
-    document.getElementById("stockForm").reset();
-    document.getElementById("stockId").value = "";
-    document.getElementById("stockModalTitle").innerHTML = '<i class="fa-solid fa-plus color-primary"></i> Add New Stock Item';
-    handleStockCategoryChange();
-    document.getElementById("stockModal").style.display = "flex";
+    try {
+        const form = document.getElementById("stockForm");
+        if (form) form.reset();
+        const stockId = document.getElementById("stockId");
+        if (stockId) stockId.value = "";
+        const title = document.getElementById("stockModalTitle");
+        if (title) title.innerHTML = '<i class="fa-solid fa-plus color-primary"></i> Add New Stock Item';
+        handleStockCategoryChange();
+    } catch (e) {
+        console.error("Error setting modal defaults:", e);
+    }
+    const modal = document.getElementById("stockModal");
+    if (modal) {
+        modal.style.display = "flex";
+        modal.classList.add("active");
+    }
 }
 
 function editStockItem(id) {
     const item = allStockItems.find(i => i.id === id);
     if (!item) return;
 
-    if (document.getElementById("stockId")) document.getElementById("stockId").value = item.id;
-    if (document.getElementById("stockItemName")) document.getElementById("stockItemName").value = item.item_name || "";
-    if (document.getElementById("stockBrand")) document.getElementById("stockBrand").value = item.brand || "TATA GI Wire";
-    if (document.getElementById("stockDiamondSize")) document.getElementById("stockDiamondSize").value = item.diamond_size || "2 X 2 Inch";
-    if (document.getElementById("stockHeight")) document.getElementById("stockHeight").value = item.height || "6";
-    if (document.getElementById("stockLength")) document.getElementById("stockLength").value = item.length_ft || "100";
-    if (document.getElementById("stockCategory")) document.getElementById("stockCategory").value = item.category || "Chain Link Fence";
-    if (document.getElementById("stockLocationPlace")) document.getElementById("stockLocationPlace").value = item.location_place || "Both";
-    if (document.getElementById("stockShopQty")) document.getElementById("stockShopQty").value = item.shop_quantity || 0;
-    if (document.getElementById("stockFactoryQty")) document.getElementById("stockFactoryQty").value = item.factory_quantity || 0;
-    if (document.getElementById("stockUnit")) document.getElementById("stockUnit").value = item.unit || "Rolls";
-    if (document.getElementById("stockNotes")) document.getElementById("stockNotes").value = item.notes || "";
+    try {
+        if (document.getElementById("stockId")) document.getElementById("stockId").value = item.id;
+        if (document.getElementById("stockItemName")) document.getElementById("stockItemName").value = item.item_name || "";
+        if (document.getElementById("stockBrand")) document.getElementById("stockBrand").value = item.brand || "TATA GI Wire";
+        if (document.getElementById("stockDiamondSize")) document.getElementById("stockDiamondSize").value = item.diamond_size || "2 X 2 Inch";
+        if (document.getElementById("stockHeight")) document.getElementById("stockHeight").value = item.height || "6";
+        if (document.getElementById("stockLength")) document.getElementById("stockLength").value = item.length_ft || "100";
+        if (document.getElementById("stockCategory")) document.getElementById("stockCategory").value = item.category || "Chain Link Fence";
+        if (document.getElementById("stockLocationPlace")) document.getElementById("stockLocationPlace").value = item.location_place || "Both";
+        if (document.getElementById("stockShopQty")) document.getElementById("stockShopQty").value = item.shop_quantity || 0;
+        if (document.getElementById("stockFactoryQty")) document.getElementById("stockFactoryQty").value = item.factory_quantity || 0;
+        if (document.getElementById("stockUnit")) document.getElementById("stockUnit").value = item.unit || "Rolls";
+        if (document.getElementById("stockNotes")) document.getElementById("stockNotes").value = item.notes || "";
 
-    handleStockCategoryChange();
-    document.getElementById("stockModalTitle").innerHTML = '<i class="fa-solid fa-pen-to-square color-primary"></i> Edit Stock Item';
-    document.getElementById("stockModal").style.display = "flex";
+        handleStockCategoryChange();
+        const title = document.getElementById("stockModalTitle");
+        if (title) title.innerHTML = '<i class="fa-solid fa-pen-to-square color-primary"></i> Edit Stock Item';
+    } catch (e) {
+        console.error("Error setting edit form data:", e);
+    }
+    const modal = document.getElementById("stockModal");
+    if (modal) {
+        modal.style.display = "flex";
+        modal.classList.add("active");
+    }
 }
 
 function closeStockModal() {
-    document.getElementById("stockModal").style.display = "none";
+    const modal = document.getElementById("stockModal");
+    if (modal) {
+        modal.style.display = "none";
+        modal.classList.remove("active");
+    }
 }
 
 async function saveStockItem(event) {

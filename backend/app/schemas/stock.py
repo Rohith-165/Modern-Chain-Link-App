@@ -11,6 +11,7 @@ class StockCreate(BaseModel):
     reorder_level: Optional[float] = 5.0
     price_per_unit: Optional[float] = 0.0
     height: Optional[str] = None
+    length_ft: Optional[str] = None
     diamond_size: Optional[str] = None
     brand: Optional[str] = None
     location_place: Optional[str] = None
@@ -25,6 +26,7 @@ class StockUpdate(BaseModel):
     reorder_level: Optional[float] = None
     price_per_unit: Optional[float] = None
     height: Optional[str] = None
+    length_ft: Optional[str] = None
     diamond_size: Optional[str] = None
     brand: Optional[str] = None
     location_place: Optional[str] = None
@@ -42,6 +44,7 @@ class StockResponse(BaseModel):
     reorder_level: float
     price_per_unit: float
     height: Optional[str] = None
+    length_ft: Optional[str] = None
     diamond_size: Optional[str] = None
     brand: Optional[str] = None
     location_place: Optional[str] = None

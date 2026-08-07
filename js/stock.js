@@ -145,6 +145,7 @@ function renderStockTable() {
 
         const tr = document.createElement("tr");
         const heightBadge = (item.height && item.height !== "N/A") ? `<span class="badge" style="background:#e0e7ff; color:#3730a3; margin-right:4px;">${item.height} Ft</span>` : '';
+        const lengthBadge = item.length_ft ? `<span class="badge" style="background:#e0f2fe; color:#0369a1; margin-right:4px;">Length: ${item.length_ft}</span>` : '';
         const diamondBadge = (item.diamond_size && item.diamond_size !== "N/A") ? `<span class="badge" style="background:#fae8ff; color:#86198f; margin-right:4px;">${item.diamond_size}</span>` : '';
         const brandBadge = item.brand ? `<span class="badge" style="background:#fef3c7; color:#92400e; margin-right:4px;">${item.brand}</span>` : '';
         const locationBadge = item.location_place ? `<span class="badge" style="background:#dcfce7; color:#166534;">${item.location_place}</span>` : '';
@@ -153,7 +154,7 @@ function renderStockTable() {
             <td>
                 <div style="font-weight: 700; color: #1e293b; font-size: 1rem;">${item.item_name}</div>
                 <div style="margin-top: 4px; font-size: 0.8rem;">
-                    ${heightBadge} ${diamondBadge} ${brandBadge} ${locationBadge}
+                    ${heightBadge} ${lengthBadge} ${diamondBadge} ${brandBadge} ${locationBadge}
                 </div>
                 <div style="font-size: 0.78rem; color: #64748b; margin-top: 2px;">${item.notes || 'Standard specifications'}</div>
             </td>
@@ -175,14 +176,9 @@ function renderStockTable() {
             </td>
             <td>${statusBadge}</td>
             <td>
-                <div class="actionButtons">
-                    <button class="btnAction btnEdit" title="Edit Stock Item" onclick="editStockItem(${item.id})">
-                        <i class="fa-solid fa-pen"></i>
-                    </button>
-                    <button class="btnAction btnDelete" title="Delete Stock Item" onclick="confirmDeleteStock(${item.id})">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                </div>
+                <button class="btn btn-sm btn-primary" onclick="editStockItem(${item.id})" style="padding: 6px 14px; font-weight: 600; border-radius: 6px;">
+                    Edit
+                </button>
             </td>
         `;
         tbody.appendChild(tr);
@@ -202,14 +198,15 @@ function editStockItem(id) {
 
     document.getElementById("stockId").value = item.id;
     document.getElementById("stockItemName").value = item.item_name || "";
-    document.getElementById("stockCategory").value = item.category || "Fence Roll";
-    document.getElementById("stockHeight").value = item.height || "6";
-    document.getElementById("stockDiamondSize").value = item.diamond_size || "2 X 2 Inch";
     document.getElementById("stockBrand").value = item.brand || "TATA GI Wire";
-    document.getElementById("stockUnit").value = item.unit || "Rolls";
+    document.getElementById("stockDiamondSize").value = item.diamond_size || "2 X 2 Inch";
+    document.getElementById("stockHeight").value = item.height || "6";
+    document.getElementById("stockLength").value = item.length_ft || "50 Ft";
+    document.getElementById("stockCategory").value = item.category || "Fence Roll";
     document.getElementById("stockLocationPlace").value = item.location_place || "Both";
     document.getElementById("stockShopQty").value = item.shop_quantity || 0;
     document.getElementById("stockFactoryQty").value = item.factory_quantity || 0;
+    document.getElementById("stockUnit").value = item.unit || "Rolls";
     document.getElementById("stockReorderLevel").value = item.reorder_level || 5;
     document.getElementById("stockNotes").value = item.notes || "";
 
@@ -227,14 +224,15 @@ async function saveStockItem(event) {
     const stockId = document.getElementById("stockId").value;
     const payload = {
         item_name: document.getElementById("stockItemName").value.trim(),
-        category: document.getElementById("stockCategory").value,
-        height: document.getElementById("stockHeight").value,
-        diamond_size: document.getElementById("stockDiamondSize").value,
         brand: document.getElementById("stockBrand").value,
-        unit: document.getElementById("stockUnit").value,
+        diamond_size: document.getElementById("stockDiamondSize").value,
+        height: document.getElementById("stockHeight").value,
+        length_ft: document.getElementById("stockLength").value.trim(),
+        category: document.getElementById("stockCategory").value,
         location_place: document.getElementById("stockLocationPlace").value,
         shop_quantity: parseFloat(document.getElementById("stockShopQty").value) || 0,
         factory_quantity: parseFloat(document.getElementById("stockFactoryQty").value) || 0,
+        unit: document.getElementById("stockUnit").value,
         reorder_level: parseFloat(document.getElementById("stockReorderLevel").value) || 5,
         price_per_unit: 0.0,
         notes: document.getElementById("stockNotes").value.trim()

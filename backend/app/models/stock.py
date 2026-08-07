@@ -16,6 +16,7 @@ class StockItem(Base):
     
     price_per_unit = Column(Float, default=0.0)
     height = Column(String, nullable=True)
+    length_ft = Column(String, nullable=True)
     diamond_size = Column(String, nullable=True)
     brand = Column(String, nullable=True)
     location_place = Column(String, nullable=True)

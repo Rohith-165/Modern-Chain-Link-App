@@ -207,7 +207,6 @@ function editStockItem(id) {
     document.getElementById("stockShopQty").value = item.shop_quantity || 0;
     document.getElementById("stockFactoryQty").value = item.factory_quantity || 0;
     document.getElementById("stockUnit").value = item.unit || "Rolls";
-    document.getElementById("stockReorderLevel").value = item.reorder_level || 5;
     document.getElementById("stockNotes").value = item.notes || "";
 
     document.getElementById("stockModalTitle").innerHTML = '<i class="fa-solid fa-pen-to-square color-primary"></i> Edit Stock Item';
@@ -233,7 +232,7 @@ async function saveStockItem(event) {
         shop_quantity: parseFloat(document.getElementById("stockShopQty").value) || 0,
         factory_quantity: parseFloat(document.getElementById("stockFactoryQty").value) || 0,
         unit: document.getElementById("stockUnit").value,
-        reorder_level: parseFloat(document.getElementById("stockReorderLevel").value) || 5,
+        reorder_level: 5.0,
         price_per_unit: 0.0,
         notes: document.getElementById("stockNotes").value.trim()
     };

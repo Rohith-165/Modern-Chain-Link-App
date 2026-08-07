@@ -144,8 +144,8 @@ function validateOrderForm() {
         isValid = false;
     }
 
-    if (!UI.validateNumber(height.value, 1, false)) {
-        UI.showFieldError(height, "Select a valid Height");
+    if (!UI.validateNumber(height.value, 0.1, false)) {
+        UI.showFieldError(height, "Enter a valid Height in feet (e.g. 5.5)");
         isValid = false;
     }
 

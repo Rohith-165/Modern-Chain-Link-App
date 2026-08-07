@@ -9,6 +9,14 @@ let searchQuery = "";
 
 document.addEventListener("DOMContentLoaded", function () {
     loadStockData();
+
+    const addBtn = document.getElementById("addStockBtn");
+    if (addBtn) {
+        addBtn.addEventListener("click", function(e) {
+            e.preventDefault();
+            openAddStockModal();
+        });
+    }
 });
 
 async function loadStockData() {
@@ -232,7 +240,7 @@ function openAddStockModal() {
     }
     const modal = document.getElementById("stockModal");
     if (modal) {
-        modal.style.display = "flex";
+        modal.style.cssText = "display: flex !important; visibility: visible !important; opacity: 1 !important; z-index: 99999 !important;";
         modal.classList.add("active");
     }
 }
@@ -263,7 +271,7 @@ function editStockItem(id) {
     }
     const modal = document.getElementById("stockModal");
     if (modal) {
-        modal.style.display = "flex";
+        modal.style.cssText = "display: flex !important; visibility: visible !important; opacity: 1 !important; z-index: 99999 !important;";
         modal.classList.add("active");
     }
 }
@@ -275,6 +283,10 @@ function closeStockModal() {
         modal.classList.remove("active");
     }
 }
+
+window.openAddStockModal = openAddStockModal;
+window.editStockItem = editStockItem;
+window.closeStockModal = closeStockModal;
 
 async function saveStockItem(event) {
     event.preventDefault();

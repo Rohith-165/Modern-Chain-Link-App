@@ -144,11 +144,18 @@ function renderStockTable() {
         }
 
         const tr = document.createElement("tr");
+        const heightBadge = (item.height && item.height !== "N/A") ? `<span class="badge" style="background:#e0e7ff; color:#3730a3; margin-right:4px;">${item.height} Ft</span>` : '';
+        const diamondBadge = (item.diamond_size && item.diamond_size !== "N/A") ? `<span class="badge" style="background:#fae8ff; color:#86198f; margin-right:4px;">${item.diamond_size}</span>` : '';
+        const brandBadge = item.brand ? `<span class="badge" style="background:#fef3c7; color:#92400e; margin-right:4px;">${item.brand}</span>` : '';
+        const locationBadge = item.location_place ? `<span class="badge" style="background:#dcfce7; color:#166534;">${item.location_place}</span>` : '';
+
         tr.innerHTML = `
-            <td><strong>#${item.id || (index + 1)}</strong></td>
             <td>
-                <div style="font-weight: 700; color: #1e293b;">${item.item_name}</div>
-                <div style="font-size: 0.8rem; color: #64748b;">${item.notes || 'Standard specifications'}</div>
+                <div style="font-weight: 700; color: #1e293b; font-size: 1rem;">${item.item_name}</div>
+                <div style="margin-top: 4px; font-size: 0.8rem;">
+                    ${heightBadge} ${diamondBadge} ${brandBadge} ${locationBadge}
+                </div>
+                <div style="font-size: 0.78rem; color: #64748b; margin-top: 2px;">${item.notes || 'Standard specifications'}</div>
             </td>
             <td><span class="categoryBadge">${item.category || 'General'}</span></td>
             <td>
@@ -165,9 +172,6 @@ function renderStockTable() {
             </td>
             <td>
                 <strong style="font-size: 1.1rem; color: #0b8f47;">${total} ${item.unit}</strong>
-            </td>
-            <td>
-                ₹${(item.price_per_unit || 0).toLocaleString('en-IN')} / ${item.unit}
             </td>
             <td>${statusBadge}</td>
             <td>
@@ -199,11 +203,14 @@ function editStockItem(id) {
     document.getElementById("stockId").value = item.id;
     document.getElementById("stockItemName").value = item.item_name || "";
     document.getElementById("stockCategory").value = item.category || "Fence Roll";
+    document.getElementById("stockHeight").value = item.height || "6";
+    document.getElementById("stockDiamondSize").value = item.diamond_size || "2 X 2 Inch";
+    document.getElementById("stockBrand").value = item.brand || "TATA GI Wire";
     document.getElementById("stockUnit").value = item.unit || "Rolls";
+    document.getElementById("stockLocationPlace").value = item.location_place || "Both";
     document.getElementById("stockShopQty").value = item.shop_quantity || 0;
     document.getElementById("stockFactoryQty").value = item.factory_quantity || 0;
     document.getElementById("stockReorderLevel").value = item.reorder_level || 5;
-    document.getElementById("stockPrice").value = item.price_per_unit || 0;
     document.getElementById("stockNotes").value = item.notes || "";
 
     document.getElementById("stockModalTitle").innerHTML = '<i class="fa-solid fa-pen-to-square color-primary"></i> Edit Stock Item';
@@ -221,11 +228,15 @@ async function saveStockItem(event) {
     const payload = {
         item_name: document.getElementById("stockItemName").value.trim(),
         category: document.getElementById("stockCategory").value,
+        height: document.getElementById("stockHeight").value,
+        diamond_size: document.getElementById("stockDiamondSize").value,
+        brand: document.getElementById("stockBrand").value,
         unit: document.getElementById("stockUnit").value,
+        location_place: document.getElementById("stockLocationPlace").value,
         shop_quantity: parseFloat(document.getElementById("stockShopQty").value) || 0,
         factory_quantity: parseFloat(document.getElementById("stockFactoryQty").value) || 0,
         reorder_level: parseFloat(document.getElementById("stockReorderLevel").value) || 5,
-        price_per_unit: parseFloat(document.getElementById("stockPrice").value) || 0,
+        price_per_unit: 0.0,
         notes: document.getElementById("stockNotes").value.trim()
     };
 
@@ -307,12 +318,15 @@ function exportStockToExcel() {
         const data = allStockItems.map((item, idx) => ({
             "S.No": idx + 1,
             "Item Name": item.item_name,
-            "Category": item.category,
+            "Category / Type": item.category,
+            "Height (Ft)": item.height || "N/A",
+            "Diamond Mesh Size": item.diamond_size || "N/A",
+            "Material Brand": item.brand || "TATA GI Wire",
+            "Storage Location": item.location_place || "Both",
             "Shop Quantity": item.shop_quantity,
             "Factory Quantity": item.factory_quantity,
             "Total Available Quantity": (parseFloat(item.shop_quantity || 0) + parseFloat(item.factory_quantity || 0)),
             "Unit": item.unit,
-            "Unit Price (₹)": item.price_per_unit,
             "Low Stock Reorder Level": item.reorder_level,
             "Status": (parseFloat(item.shop_quantity || 0) + parseFloat(item.factory_quantity || 0)) <= item.reorder_level ? "LOW STOCK" : "IN STOCK",
             "Notes": item.notes || ""

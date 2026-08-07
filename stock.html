@@ -159,13 +159,11 @@
                     <table class="ordersTable">
                         <thead>
                             <tr>
-                                <th># ID</th>
-                                <th>Item Details</th>
-                                <th>Category</th>
+                                <th>Item Specifications</th>
+                                <th>Category / Type</th>
                                 <th>🏪 Shop Stock</th>
                                 <th>🏭 Factory Stock</th>
                                 <th>Total Stock</th>
-                                <th>Unit Price</th>
                                 <th>Status</th>
                                 <th>Actions</th>
                             </tr>
@@ -235,7 +233,7 @@
 
                     <div class="formRow">
                         <div class="formGroup">
-                            <label class="formLabel" for="stockCategory">Category</label>
+                            <label class="formLabel" for="stockCategory">Category / Type</label>
                             <select id="stockCategory" class="formInput">
                                 <option value="Fence Roll">Fence Roll</option>
                                 <option value="Barbed Wire">Barbed Wire</option>
@@ -249,6 +247,47 @@
                             </select>
                         </div>
                         <div class="formGroup">
+                            <label class="formLabel" for="stockHeight">Height (Feet)</label>
+                            <select id="stockHeight" class="formInput">
+                                <option value="N/A">Not Applicable</option>
+                                <option value="2">2 Ft</option>
+                                <option value="3">3 Ft</option>
+                                <option value="4">4 Ft</option>
+                                <option value="5">5 Ft</option>
+                                <option value="6" selected>6 Ft</option>
+                                <option value="7">7 Ft</option>
+                                <option value="8">8 Ft</option>
+                                <option value="9">9 Ft</option>
+                                <option value="10">10 Ft</option>
+                                <option value="12">12 Ft</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="formRow">
+                        <div class="formGroup">
+                            <label class="formLabel" for="stockDiamondSize">Diamond Mesh Size</label>
+                            <select id="stockDiamondSize" class="formInput">
+                                <option value="N/A">Not Applicable</option>
+                                <option value="1 X 1 Inch">1 X 1 Inch</option>
+                                <option value="1.5 X 1.5 Inch">1.5 X 1.5 Inch</option>
+                                <option value="2 X 2 Inch" selected>2 X 2 Inch</option>
+                                <option value="3 X 3 Inch">3 X 3 Inch</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="formGroup">
+                            <label class="formLabel" for="stockBrand">Material Brand</label>
+                            <select id="stockBrand" class="formInput">
+                                <option value="TATA GI Wire">TATA GI Wire</option>
+                                <option value="Micon Wire">Micon Wire</option>
+                                <option value="Local Quality">Local Quality</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="formRow">
+                        <div class="formGroup">
                             <label class="formLabel" for="stockUnit">Unit of Measure</label>
                             <select id="stockUnit" class="formInput">
                                 <option value="Rolls">Rolls</option>
@@ -256,6 +295,14 @@
                                 <option value="Pieces">Pieces</option>
                                 <option value="Sq.Ft">Sq.Ft</option>
                                 <option value="Bundles">Bundles</option>
+                            </select>
+                        </div>
+                        <div class="formGroup">
+                            <label class="formLabel" for="stockLocationPlace">Storage Location</label>
+                            <select id="stockLocationPlace" class="formInput">
+                                <option value="Both">Both (Shop & Factory)</option>
+                                <option value="Shop">Shop Only</option>
+                                <option value="Factory">Factory Only</option>
                             </select>
                         </div>
                     </div>
@@ -271,15 +318,9 @@
                         </div>
                     </div>
 
-                    <div class="formRow">
-                        <div class="formGroup">
-                            <label class="formLabel" for="stockReorderLevel">Low Stock Warning Threshold</label>
-                            <input type="number" step="0.1" id="stockReorderLevel" class="formInput" placeholder="5.0" min="0" value="5">
-                        </div>
-                        <div class="formGroup">
-                            <label class="formLabel" for="stockPrice">Price / Unit (₹)</label>
-                            <input type="number" step="0.1" id="stockPrice" class="formInput" placeholder="0.0" min="0" value="0">
-                        </div>
+                    <div class="formGroup">
+                        <label class="formLabel" for="stockReorderLevel">Low Stock Warning Threshold</label>
+                        <input type="number" step="0.1" id="stockReorderLevel" class="formInput" placeholder="5.0" min="0" value="5">
                     </div>
 
                     <div class="formGroup">

@@ -15,5 +15,9 @@ class StockItem(Base):
     reorder_level = Column(Float, default=5.0)                # Low stock warning threshold
     
     price_per_unit = Column(Float, default=0.0)
+    height = Column(String, nullable=True)
+    diamond_size = Column(String, nullable=True)
+    brand = Column(String, nullable=True)
+    location_place = Column(String, nullable=True)
     notes = Column(Text, nullable=True)
     updated_at = Column(DateTime, default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC))

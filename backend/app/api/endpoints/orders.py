@@ -65,6 +65,13 @@ def update_order(
     log_order_event("UPDATE", order.order_id, f"Status: {order.status}")
     return order
 
+@router.delete("/{order_id}")
+def delete_order(order_id: str):
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Order deletion is disabled. Orders cannot be deleted once created."
+    )
+
 @router.get("/{order_id}/invoice", response_class=HTMLResponse)
 def get_order_invoice_html(
     order_id: str,

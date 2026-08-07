@@ -256,40 +256,55 @@ const API = {
     },
 
     async getOrder(orderId) {
+        let serverOrder = null;
         try {
-            const serverOrder = await this.request(`/orders/${orderId}`, { method: "GET" }, () => null);
-            if (serverOrder) return serverOrder;
+            serverOrder = await this.request(`/orders/${orderId}`, { method: "GET" }, () => null);
         } catch (e) {}
 
         const orders = JSON.parse(localStorage.getItem("orders")) || [];
-        const o = orders.find(item => (item.order_id || item.orderId) === orderId);
-        if (!o) return null;
+        const localOrder = orders.find(item => (item.order_id || item.orderId) === orderId);
+
+        let merged = null;
+        if (serverOrder && localOrder) {
+            merged = { ...localOrder, ...serverOrder };
+        } else if (serverOrder) {
+            merged = serverOrder;
+        } else if (localOrder) {
+            merged = localOrder;
+        }
+
+        if (!merged) return null;
+
         return {
-            order_id: o.order_id || o.orderId,
-            customer_name: o.customer_name || o.customerName,
-            phone_number: o.phone_number || o.phoneNumber,
-            address: o.address,
-            order_type: o.order_type || o.orderType,
-            material_type: o.material_type || o.materialType,
-            diamond_size: o.diamond_size || o.diamondSize,
-            brand: o.brand,
-            ordered_date: o.ordered_date || o.orderedDate,
-            delivery_date: o.delivery_date || o.deliveryDate,
-            height: o.height,
-            length: o.length,
-            sqft_price: o.sqft_price || o.sqftPrice,
-            area: o.area,
-            material_cost: o.material_cost || o.materialCost,
-            barbed_wire: o.barbed_wire || o.barbedWire,
-            binding_wire: o.binding_wire || o.bindingWire,
-            labour: o.labour,
-            travel: o.travel,
-            stone: o.stone,
-            total_amount: o.total_amount || o.totalAmount,
-            amount_paid: o.amount_paid || o.amountPaid,
-            balance_amount: o.balance_amount || o.balanceAmount,
-            status: o.status,
-            payments: (o.payments || []).map(p => ({
+            order_id: merged.order_id || merged.orderId,
+            customer_name: merged.customer_name || merged.customerName,
+            phone_number: merged.phone_number || merged.phoneNumber,
+            address: merged.address,
+            order_type: merged.order_type || merged.orderType,
+            material_type: merged.material_type || merged.materialType,
+            diamond_size: merged.diamond_size || merged.diamondSize,
+            brand: merged.brand,
+            ordered_date: merged.ordered_date || merged.orderedDate,
+            delivery_date: merged.delivery_date || merged.deliveryDate,
+            height: merged.height,
+            length: merged.length,
+            sqft_price: merged.sqft_price || merged.sqftPrice,
+            area: merged.area,
+            material_cost: merged.material_cost || merged.materialCost,
+            barbed_wire: merged.barbed_wire || merged.barbedWire,
+            barbed_wire_kg: merged.barbed_wire_kg || merged.barbedWireKg || 0,
+            barbed_wire_rate: merged.barbed_wire_rate || merged.barbedWireRate || 0,
+            binding_wire: merged.binding_wire || merged.bindingWire,
+            binding_wire_kg: merged.binding_wire_kg || merged.bindingWireKg || 0,
+            binding_wire_rate: merged.binding_wire_rate || merged.bindingWireRate || 0,
+            labour: merged.labour,
+            travel: merged.travel,
+            stone: merged.stone,
+            total_amount: merged.total_amount || merged.totalAmount,
+            amount_paid: merged.amount_paid || merged.amountPaid,
+            balance_amount: merged.balance_amount || merged.balanceAmount,
+            status: merged.status,
+            payments: (merged.payments || []).map(p => ({
                 id: p.id,
                 amount: p.amount,
                 payment_mode: p.payment_mode || p.mode,

@@ -209,15 +209,28 @@ const API = {
             let localOrders = JSON.parse(localStorage.getItem("orders")) || [];
 
             let map = new Map();
-            if (Array.isArray(serverOrders) && serverOrders.length > 0) {
-                serverOrders.forEach(o => map.set(o.order_id || o.orderId, o));
-                // Update local storage cache
-                localStorage.setItem("orders", JSON.stringify(Array.from(map.values())));
-            } else {
-                localOrders.forEach(o => map.set(o.order_id || o.orderId, o));
+
+            // 1. Add all local orders first so created/updated orders are NEVER lost!
+            if (Array.isArray(localOrders)) {
+                localOrders.forEach(o => {
+                    const id = o.order_id || o.orderId;
+                    if (id) map.set(id, o);
+                });
+            }
+
+            // 2. Merge server orders into map
+            if (Array.isArray(serverOrders)) {
+                serverOrders.forEach(so => {
+                    const id = so.order_id || so.orderId;
+                    if (id) {
+                        const existing = map.get(id);
+                        map.set(id, { ...existing, ...so });
+                    }
+                });
             }
 
             let combined = Array.from(map.values());
+            localStorage.setItem("orders", JSON.stringify(combined));
 
             if (status !== "All") {
                 combined = combined.filter(o => o.status === status);
@@ -327,23 +340,24 @@ const API = {
         const year = new Date().getFullYear();
         const generatedId = `MCLC-${year}-${String(orders.length + 1).padStart(4, '0')}`;
 
-        const createdOrder = res || {
+        const createdOrder = {
             id: Date.now(),
             order_id: generatedId,
             orderId: generatedId,
             ...orderPayload,
-            created_at: new Date().toISOString(),
-            payments: orderPayload.amount_paid > 0 ? [{
+            ...(res || {}),
+            created_at: (res && res.created_at) ? res.created_at : new Date().toISOString(),
+            payments: (res && res.payments && res.payments.length > 0) ? res.payments : (orderPayload.amount_paid > 0 ? [{
                 id: 1,
                 amount: orderPayload.amount_paid,
                 payment_mode: "Advance Cash/UPI",
                 created_at: new Date().toISOString()
-            }] : []
+            }] : [])
         };
 
         const existingIdx = orders.findIndex(o => (o.order_id || o.orderId) === (createdOrder.order_id || createdOrder.orderId));
         if (existingIdx !== -1) {
-            orders[existingIdx] = createdOrder;
+            orders[existingIdx] = { ...orders[existingIdx], ...createdOrder };
         } else {
             orders.unshift(createdOrder);
         }
@@ -365,10 +379,12 @@ const API = {
         const idx = orders.findIndex(o => (o.order_id || o.orderId) === orderId);
         if (idx !== -1) {
             orders[idx] = { ...orders[idx], ...orderPayload, ...(res || {}) };
-            localStorage.setItem("orders", JSON.stringify(orders));
+        } else {
+            orders.unshift({ order_id: orderId, orderId: orderId, ...orderPayload, ...(res || {}) });
         }
+        localStorage.setItem("orders", JSON.stringify(orders));
 
-        return res || { order_id: orderId, ...orderPayload };
+        return res || orders[idx] || { order_id: orderId, ...orderPayload };
     },
 
     async getOrderHistory(orderId) {

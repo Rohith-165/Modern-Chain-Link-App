@@ -36,25 +36,23 @@ async function loadStockData() {
 function updateSummaryKPIs() {
     let totalShop = 0;
     let totalFactory = 0;
-    let lowStockCount = 0;
 
     allStockItems.forEach(item => {
         const shop = parseFloat(item.shop_quantity || 0);
         const factory = parseFloat(item.factory_quantity || 0);
-        const reorder = parseFloat(item.reorder_level || 5);
 
         totalShop += shop;
         totalFactory += factory;
-
-        if ((shop + factory) <= reorder) {
-            lowStockCount++;
-        }
     });
 
-    document.getElementById("totalShopStock").textContent = totalShop.toLocaleString('en-IN') + " Ft";
-    document.getElementById("totalFactoryStock").textContent = totalFactory.toLocaleString('en-IN') + " Ft";
-    const lowEl = document.getElementById("lowStockCount");
-    if (lowEl) lowEl.textContent = lowStockCount;
+    const shopEl = document.getElementById("totalShopStock");
+    if (shopEl) shopEl.textContent = totalShop.toLocaleString('en-IN');
+
+    const factoryEl = document.getElementById("totalFactoryStock");
+    if (factoryEl) factoryEl.textContent = totalFactory.toLocaleString('en-IN');
+
+    const combinedEl = document.getElementById("totalCombinedStock");
+    if (combinedEl) combinedEl.textContent = (totalShop + totalFactory).toLocaleString('en-IN');
 }
 
 function filterByLocation(location) {
@@ -120,7 +118,9 @@ function renderStockTable() {
         if (searchQuery) {
             const name = (item.item_name || "").toLowerCase();
             const cat = (item.category || "").toLowerCase();
-            if (!name.includes(searchQuery) && !cat.includes(searchQuery)) {
+            const brand = (item.brand || "").toLowerCase();
+            const diamond = (item.diamond_size || "").toLowerCase();
+            if (!name.includes(searchQuery) && !cat.includes(searchQuery) && !brand.includes(searchQuery) && !diamond.includes(searchQuery)) {
                 return false;
             }
         }
@@ -141,18 +141,7 @@ function renderStockTable() {
         const shop = parseFloat(item.shop_quantity || 0);
         const factory = parseFloat(item.factory_quantity || 0);
         const total = shop + factory;
-        const reorder = parseFloat(item.reorder_level || 5);
 
-        let statusBadge = '';
-        if (total <= 0) {
-            statusBadge = '<span class="statusBadge badge-cancelled"><i class="fa-solid fa-circle-xmark"></i> Out of Stock</span>';
-        } else if (total <= reorder) {
-            statusBadge = '<span class="statusBadge badge-pending"><i class="fa-solid fa-triangle-exclamation"></i> Low Stock</span>';
-        } else {
-            statusBadge = '<span class="statusBadge badge-completed"><i class="fa-solid fa-circle-check"></i> In Stock</span>';
-        }
-
-        const tr = document.createElement("tr");
         const categoryStr = item.category || item.item_name || 'General';
         const catLower = categoryStr.toLowerCase();
 
@@ -173,8 +162,9 @@ function renderStockTable() {
             lengthOrWeight = item.length_ft ? `${item.length_ft} Ft` : '100 Ft';
         }
 
+        const tr = document.createElement("tr");
         tr.innerHTML = `
-            <td><strong style="color: #1e293b; font-size: 0.95rem;">${categoryStr}</strong></td>
+            <td><strong style="color: #1e293b; font-size: 0.95rem;"><i class="fa-solid fa-layer-group color-primary"></i> ${categoryStr}</strong></td>
             <td><span class="badge" style="background:#fae8ff; color:#86198f;">${item.diamond_size || 'N/A'}</span></td>
             <td><span class="badge" style="background:#fef3c7; color:#92400e;">${item.brand || 'TATA GI Wire'}</span></td>
             <td><span class="badge" style="background:#e0e7ff; color:#3730a3;">${item.height && item.height !== 'N/A' ? item.height + ' Ft' : 'N/A'}</span></td>
@@ -193,6 +183,11 @@ function renderStockTable() {
             </td>
             <td>
                 <strong style="font-size: 1.1rem; color: #0b8f47;">${total} ${unit}</strong>
+            </td>
+            <td>
+                <button type="button" class="btn btn-sm btn-outline-success" onclick="editStockItem(${item.id})" title="Edit Stock Item">
+                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                </button>
             </td>
         `;
         tbody.appendChild(tr);

@@ -95,8 +95,8 @@
                     </div>
                     <div class="summaryDetails">
                         <span class="summaryLabel">Shop Stock</span>
-                        <h3 class="summaryValue" id="totalShopStock">0 Ft</h3>
-                        <span class="summarySub">Total Length in Showroom</span>
+                        <h3 class="summaryValue" id="totalShopStock">0</h3>
+                        <span class="summarySub">Showroom Stock</span>
                     </div>
                 </div>
 
@@ -106,8 +106,19 @@
                     </div>
                     <div class="summaryDetails">
                         <span class="summaryLabel">Factory Stock</span>
-                        <h3 class="summaryValue" id="totalFactoryStock">0 Ft</h3>
-                        <span class="summarySub">Total Length in Factory</span>
+                        <h3 class="summaryValue" id="totalFactoryStock">0</h3>
+                        <span class="summarySub">Warehouse Stock</span>
+                    </div>
+                </div>
+
+                <div class="summaryCard cursor-pointer" onclick="clearLocationFilter()">
+                    <div class="summaryIcon bg-green-light" style="background: #e6f4ea; color: #0b8f47;">
+                        <i class="fa-solid fa-boxes-stacked color-primary"></i>
+                    </div>
+                    <div class="summaryDetails">
+                        <span class="summaryLabel">Total Combined Stock</span>
+                        <h3 class="summaryValue" id="totalCombinedStock" style="color: #0b8f47;">0</h3>
+                        <span class="summarySub">Grand Total Inventory</span>
                     </div>
                 </div>
             </section>
@@ -116,15 +127,19 @@
             <section class="controlsSection">
                 <div class="searchBox">
                     <i class="fa-solid fa-magnifying-glass searchIcon"></i>
-                    <input type="text" id="stockSearchInput" placeholder="Search item by name or category..." onkeyup="handleStockSearch()">
+                    <input type="text" id="stockSearchInput" placeholder="Search item by material, brand, or size..." onkeyup="handleStockSearch()">
                 </div>
 
-                <div class="filterTabs">
+                <div class="filterTabs" style="overflow-x: auto; flex-wrap: nowrap; padding-bottom: 6px;">
                     <button class="filterTab active" onclick="setStockFilter('All', this)">All Items</button>
-                    <button class="filterTab" onclick="setStockFilter('Fence Roll', this)">Fence Rolls</button>
+                    <button class="filterTab" onclick="setStockFilter('Chain Link Fence', this)">Chain Link Fence</button>
                     <button class="filterTab" onclick="setStockFilter('Barbed Wire', this)">Barbed Wire</button>
+                    <button class="filterTab" onclick="setStockFilter('15mm PVC W.mesh', this)">15mm PVC Mesh</button>
+                    <button class="filterTab" onclick="setStockFilter('12mm PVC W.mesh', this)">12mm PVC Mesh</button>
+                    <button class="filterTab" onclick="setStockFilter('Agronet', this)">Agronet</button>
+                    <button class="filterTab" onclick="setStockFilter('Chicken mesh', this)">Chicken Mesh</button>
                     <button class="filterTab" onclick="setStockFilter('Binding Wire', this)">Binding Wire</button>
-                    <button class="filterTab" onclick="setStockFilter('Poles', this)">Poles</button>
+                    <button class="filterTab" onclick="setStockFilter('Poles', this)">Poles / Stones</button>
                     <button class="filterTab" onclick="setStockFilter('Raw Wire', this)">Raw Wire Coils</button>
                 </div>
             </section>
@@ -138,7 +153,7 @@
             <!-- Stock Items Grid / Table -->
             <section class="ordersTableCard">
                 <div class="tableHeader">
-                    <h2><i class="fa-solid fa-warehouse"></i> Inventory Items</h2>
+                    <h2><i class="fa-solid fa-warehouse color-primary"></i> Fencing Stock Inventory</h2>
                     <button class="btn btn-sm btn-outline-success" onclick="exportStockToExcel()">
                         <i class="fa-solid fa-file-excel"></i> Export Excel
                     </button>
@@ -156,6 +171,7 @@
                                 <th>🏪 Shop Stock</th>
                                 <th>🏭 Factory Stock</th>
                                 <th>Total Stock</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="stockTableBody">

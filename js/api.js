@@ -204,7 +204,47 @@ const API = {
         });
     },
 
-    // 4. ORDERS
+    // Permanent Orders Vault helpers
+    getStoredOrders() {
+        let primary = [];
+        let backup = [];
+        try {
+            primary = JSON.parse(localStorage.getItem("orders")) || [];
+        } catch (e) {}
+        try {
+            backup = JSON.parse(localStorage.getItem("mclc_permanent_orders_backup")) || [];
+        } catch (e) {}
+
+        const map = new Map();
+        [...backup, ...primary].forEach(o => {
+            const id = o.order_id || o.orderId;
+            if (id) {
+                const existing = map.get(id) || {};
+                map.set(id, { ...existing, ...o });
+            }
+        });
+        const merged = Array.from(map.values());
+        localStorage.setItem("orders", JSON.stringify(merged));
+        localStorage.setItem("mclc_permanent_orders_backup", JSON.stringify(merged));
+        return merged;
+    },
+
+    saveStoredOrders(ordersList) {
+        const map = new Map();
+        const currentBackup = this.getStoredOrders();
+        [...currentBackup, ...ordersList].forEach(o => {
+            const id = o.order_id || o.orderId;
+            if (id) {
+                const existing = map.get(id) || {};
+                map.set(id, { ...existing, ...o });
+            }
+        });
+        const merged = Array.from(map.values());
+        localStorage.setItem("orders", JSON.stringify(merged));
+        localStorage.setItem("mclc_permanent_orders_backup", JSON.stringify(merged));
+        return merged;
+    },
+
     // 4. ORDERS
     async getOrders(status = "All", search = "") {
         const params = new URLSearchParams();
@@ -214,11 +254,11 @@ const API = {
 
         try {
             const serverOrders = await this.request(`/orders${query}`, { method: "GET" }, () => null);
-            let localOrders = JSON.parse(localStorage.getItem("orders")) || [];
+            let localOrders = this.getStoredOrders();
 
             let map = new Map();
 
-            // 1. Add all local orders first so created/updated orders are NEVER lost!
+            // 1. Load all local & backup orders first so created/updated orders are NEVER lost!
             if (Array.isArray(localOrders)) {
                 localOrders.forEach(o => {
                     const id = o.order_id || o.orderId;
@@ -227,18 +267,18 @@ const API = {
             }
 
             // 2. Merge server orders into map
-            if (Array.isArray(serverOrders)) {
+            if (Array.isArray(serverOrders) && serverOrders.length > 0) {
                 serverOrders.forEach(so => {
                     const id = so.order_id || so.orderId;
                     if (id) {
-                        const existing = map.get(id);
+                        const existing = map.get(id) || {};
                         map.set(id, { ...existing, ...so });
                     }
                 });
             }
 
             let combined = Array.from(map.values());
-            localStorage.setItem("orders", JSON.stringify(combined));
+            this.saveStoredOrders(combined);
 
             if (status !== "All") {
                 combined = combined.filter(o => o.status === status);
@@ -253,16 +293,23 @@ const API = {
             }
 
             return combined.map(o => ({
+                ...o,
                 order_id: o.order_id || o.orderId,
+                orderId: o.order_id || o.orderId,
                 customer_name: o.customer_name || o.customerName,
+                customerName: o.customer_name || o.customerName,
                 phone_number: o.phone_number || o.phoneNumber,
+                phoneNumber: o.phone_number || o.phoneNumber,
                 order_type: o.order_type || o.orderType,
+                orderType: o.order_type || o.orderType,
                 total_amount: o.total_amount || o.totalAmount,
+                totalAmount: o.total_amount || o.totalAmount,
                 balance_amount: o.balance_amount || o.balanceAmount,
+                balanceAmount: o.balance_amount || o.balanceAmount,
                 status: o.status
             }));
         } catch (err) {
-            let orders = JSON.parse(localStorage.getItem("orders")) || [];
+            let orders = this.getStoredOrders();
             if (status !== "All") orders = orders.filter(o => o.status === status);
             if (search) {
                 const s = search.toLowerCase();
@@ -372,7 +419,7 @@ const API = {
             }, () => null);
         } catch (e) {}
 
-        let orders = JSON.parse(localStorage.getItem("orders")) || [];
+        let orders = this.getStoredOrders();
         const year = new Date().getFullYear();
         const generatedId = `MCLC-${year}-${String(orders.length + 1).padStart(4, '0')}`;
 
@@ -397,7 +444,7 @@ const API = {
         } else {
             orders.unshift(createdOrder);
         }
-        localStorage.setItem("orders", JSON.stringify(orders));
+        this.saveStoredOrders(orders);
 
         // Automatically update stock inventory for created order material
         await this.deductStockForOrder(createdOrder);
@@ -414,14 +461,14 @@ const API = {
             }, () => null);
         } catch (e) {}
 
-        let orders = JSON.parse(localStorage.getItem("orders")) || [];
+        let orders = this.getStoredOrders();
         const idx = orders.findIndex(o => (o.order_id || o.orderId) === orderId);
         if (idx !== -1) {
             orders[idx] = { ...orders[idx], ...orderPayload, ...(res || {}) };
         } else {
             orders.unshift({ order_id: orderId, orderId: orderId, ...orderPayload, ...(res || {}) });
         }
-        localStorage.setItem("orders", JSON.stringify(orders));
+        this.saveStoredOrders(orders);
 
         return res || orders[idx] || { order_id: orderId, ...orderPayload };
     },
@@ -440,7 +487,7 @@ const API = {
             }, () => null);
         } catch (e) {}
 
-        let orders = JSON.parse(localStorage.getItem("orders")) || [];
+        let orders = this.getStoredOrders();
         const idx = orders.findIndex(o => (o.order_id || o.orderId) === orderId);
         if (idx !== -1) {
             if (!orders[idx].payments) orders[idx].payments = [];
@@ -456,7 +503,7 @@ const API = {
             orders[idx].amountPaid = paidSum;
             orders[idx].balance_amount = Math.max(0, (orders[idx].total_amount || orders[idx].totalAmount || 0) - paidSum);
             orders[idx].balanceAmount = orders[idx].balance_amount;
-            localStorage.setItem("orders", JSON.stringify(orders));
+            this.saveStoredOrders(orders);
         }
 
         return res || { status: "ok" };

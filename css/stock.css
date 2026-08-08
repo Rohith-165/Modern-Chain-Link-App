@@ -203,7 +203,13 @@ body {
     display: flex;
     gap: 10px;
     overflow-x: auto;
-    padding-bottom: 4px;
+    padding-bottom: 6px;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.filterTabs::-webkit-scrollbar {
+    display: none;
 }
 
 .filterTab {

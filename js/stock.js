@@ -23,6 +23,24 @@ async function loadStockData() {
     UI.showLoader("Loading stock inventory...");
     try {
         allStockItems = await API.getStock();
+
+        if (!allStockItems || allStockItems.length === 0) {
+            const defaultItems = [
+                { item_name: "TATA GI Wire Chain Link Fence 6ft", category: "Chain Link Fence", diamond_size: "2 X 2 Inch", brand: "TATA GI Wire", height: "6", length_ft: "100", shop_quantity: 50, factory_quantity: 150, location_place: "Both", unit: "Rolls", notes: "Standard 6ft Chain Link Fence" },
+                { item_name: "TATA GI Barbed Wire 50kg", category: "Barbed Wire", diamond_size: "N/A", brand: "TATA GI Wire", height: "N/A", length_ft: "50", shop_quantity: 200, factory_quantity: 800, location_place: "Both", unit: "Kg", notes: "50kg Barbed Wire Bundle" },
+                { item_name: "Micon Wire 15mm PVC W.mesh 5ft", category: "15mm PVC W.mesh", diamond_size: "1.5 X 1.5 Inch", brand: "Micon Wire", height: "5", length_ft: "100", shop_quantity: 30, factory_quantity: 70, location_place: "Both", unit: "Rolls", notes: "Green PVC Coated Mesh" },
+                { item_name: "Local Quality Binding Wire 25kg", category: "Binding Wire", diamond_size: "N/A", brand: "Local Quality", height: "N/A", length_ft: "25", shop_quantity: 100, factory_quantity: 400, location_place: "Both", unit: "Kg", notes: "Binding Wire for Fencing Installation" },
+                { item_name: "Cement Fencing Poles 8ft", category: "Poles", diamond_size: "N/A", brand: "Local Quality", height: "8", length_ft: "Count (Pcs)", shop_quantity: 40, factory_quantity: 200, location_place: "Both", unit: "Pieces", notes: "8ft Reinforced Cement Poles" }
+            ];
+
+            for (const item of defaultItems) {
+                try {
+                    await API.createStockItem(item);
+                } catch (e) {}
+            }
+            allStockItems = await API.getStock();
+        }
+
         UI.hideLoader();
         updateSummaryKPIs();
         renderStockTable();
@@ -404,45 +422,39 @@ function exportStockToExcel() {
 
         if (typeof XLSX !== "undefined") {
             const worksheet = XLSX.utils.json_to_sheet(data);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Stock Inventory");
-            XLSX.writeFile(workbook, `Stock_Inventory_${new Date().toISOString().split('T')[0]}.xlsx`);
-            UI.success("Stock inventory exported to Excel!");
-        } else {
-            UI.error("Excel export library not loaded");
-        }
-    } catch (err) {
-        UI.error("Failed to export Excel: " + err.message);
-    }
-}
+            const colWidths = [
+                { wch: 6 },
+                { wch: 22 },
                 { wch: 15 },
                 { wch: 16 },
-                { wch: 22 },
+                { wch: 14 },
+                { wch: 25 },
+                { wch: 18 },
+                { wch: 14 },
+                { wch: 16 },
+                { wch: 14 },
                 { wch: 10 },
-                { wch: 14 },
-                { wch: 22 },
-                { wch: 14 },
                 { wch: 25 }
             ];
             worksheet['!cols'] = colWidths;
-
-            const dateStr = new Date().toISOString().split('T')[0];
-            XLSX.writeFile(workbook, `Modern_Chain_Link_Stock_Report_${dateStr}.xlsx`);
-            UI.success("Stock inventory exported to Excel successfully!");
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Stock Inventory");
+            XLSX.writeFile(workbook, `Modern_Chain_Link_Stock_${new Date().toISOString().split('T')[0]}.xlsx`);
+            UI.success("Stock inventory exported to Excel!");
         } else {
-            let csv = "S.No,Item Name,Category,Shop Qty,Factory Qty,Total Qty,Unit,Price,Status\n";
+            let csv = "S.No,Material Type,Diamond Size,Brand,Height,Length/Weight,Shop Qty,Factory Qty,Total Stock\n";
             data.forEach(row => {
-                csv += `"${row["S.No"]}","${row["Item Name"]}","${row["Category"]}","${row["Shop Quantity"]}","${row["Factory Quantity"]}","${row["Total Available Quantity"]}","${row["Unit"]}","${row["Unit Price (₹)"]}","${row["Status"]}"\n`;
+                csv += `"${row["S.No"]}","${row["Material Type"]}","${row["Diamond Size"]}","${row["Brand"]}","${row["Height (Feet)"]}","${row["Running Length (Ft) / Weight (Kg)"]}","${row["Shop Quantity"]}","${row["Factory Quantity"]}","${row["Total Stock"]}"\n`;
             });
             const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = `Modern_Chain_Link_Stock_Report_${new Date().toISOString().split('T')[0]}.csv`;
+            link.download = `Modern_Chain_Link_Stock_${new Date().toISOString().split('T')[0]}.csv`;
             link.click();
             UI.success("Stock inventory exported to CSV!");
         }
     } catch (err) {
         console.error("Excel Export Error:", err);
-        UI.error("Failed to export Excel file.");
+        UI.error("Failed to export stock inventory.");
     }
 }

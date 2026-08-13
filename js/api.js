@@ -225,9 +225,10 @@ const API = {
         });
         let merged = Array.from(map.values());
 
-        // If orders were explicitly cleared or empty, return empty array
-        const ordersCleared = localStorage.getItem("ordersCleared") === "true";
-        if (ordersCleared) {
+        // If orders exist, reset cleared flag; otherwise if explicitly cleared, return empty array
+        if (merged.length > 0) {
+            localStorage.removeItem("ordersCleared");
+        } else if (localStorage.getItem("ordersCleared") === "true") {
             return [];
         }
 
@@ -276,6 +277,9 @@ const API = {
             }
         });
         const merged = Array.from(map.values());
+        if (merged.length > 0) {
+            localStorage.removeItem("ordersCleared");
+        }
         localStorage.setItem("orders", JSON.stringify(merged));
         localStorage.setItem("mclc_permanent_orders_backup", JSON.stringify(merged));
         return merged;
@@ -512,6 +516,7 @@ const API = {
     },
 
     async createOrder(orderPayload) {
+        localStorage.removeItem("ordersCleared");
         let res = null;
         try {
             res = await this.request("/orders", {

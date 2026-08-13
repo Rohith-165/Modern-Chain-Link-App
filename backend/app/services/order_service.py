@@ -113,8 +113,13 @@ def create_order(db: Session, order_in: OrderCreate, current_user: User = None) 
 
 def get_orders(db: Session, status: str = None, search: str = None):
     query = db.query(Order)
-    if status and status != "All":
-        query = query.filter(Order.status == status)
+    if status == "Trash":
+        query = query.filter(Order.is_deleted == 1)
+    else:
+        query = query.filter((Order.is_deleted == 0) | (Order.is_deleted == None))
+        if status and status != "All":
+            query = query.filter(Order.status == status)
+
     if search:
         search_fmt = f"%{search.lower()}%"
         query = query.filter(
@@ -155,6 +160,9 @@ def update_order(db: Session, order_id: str, order_in: OrderUpdate, current_user
                     (order_in.labour or 0) + (order_in.travel or 0) + (order_in.stone or 0)
     
     total_amount = material_cost + extra_charges
+    # Allow advance amount editing
+    if order_in.amount_paid is not None:
+        db_order.amount_paid = order_in.amount_paid
     balance_amount = max(0.0, total_amount - db_order.amount_paid)
 
     if db_order.total_amount != total_amount:
@@ -201,6 +209,24 @@ def update_order(db: Session, order_id: str, order_in: OrderUpdate, current_user
     )
 
     return db_order
+
+def trash_order(db: Session, order_id: str) -> bool:
+    db_order = get_order_by_order_id(db, order_id)
+    if not db_order:
+        return False
+    db_order.is_deleted = 1
+    db_order.deleted_at = datetime.now(UTC)
+    db.commit()
+    return True
+
+def restore_order(db: Session, order_id: str) -> bool:
+    db_order = get_order_by_order_id(db, order_id)
+    if not db_order:
+        return False
+    db_order.is_deleted = 0
+    db_order.deleted_at = None
+    db.commit()
+    return True
 
 def delete_order(db: Session, order_id: str) -> bool:
     db_order = get_order_by_order_id(db, order_id)

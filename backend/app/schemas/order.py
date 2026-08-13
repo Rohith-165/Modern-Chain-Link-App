@@ -44,4 +44,6 @@ class OrderResponse(OrderBase):
     total_amount: float
     balance_amount: float
     created_at: datetime
+    is_deleted: Optional[int] = 0
+    deleted_at: Optional[datetime] = None
     payments: List[PaymentResponse] = []

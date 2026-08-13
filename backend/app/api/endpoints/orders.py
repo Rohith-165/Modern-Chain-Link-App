@@ -65,12 +65,36 @@ def update_order(
     log_order_event("UPDATE", order.order_id, f"Status: {order.status}")
     return order
 
+@router.post("/{order_id}/trash")
+def trash_order_endpoint(order_id: str, db: Session = Depends(get_db)):
+    success = order_service.trash_order(db, order_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Order not found")
+    log_order_event("TRASH", order_id, "Moved order to 30-day Trash Vault")
+    return {"status": "success", "message": f"Order {order_id} moved to Trash"}
+
+@router.post("/{order_id}/restore")
+def restore_order_endpoint(order_id: str, db: Session = Depends(get_db)):
+    success = order_service.restore_order(db, order_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Order not found")
+    log_order_event("RESTORE", order_id, "Restored order from Trash Vault")
+    return {"status": "success", "message": f"Order {order_id} restored successfully"}
+
 @router.delete("/{order_id}")
 def delete_order(order_id: str, db: Session = Depends(get_db)):
+    success = order_service.trash_order(db, order_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Order not found")
+    return {"status": "success", "message": f"Order {order_id} moved to Trash successfully"}
+
+@router.delete("/{order_id}/permanent")
+def delete_order_permanently(order_id: str, db: Session = Depends(get_db)):
     success = order_service.delete_order(db, order_id)
     if not success:
         raise HTTPException(status_code=404, detail="Order not found")
-    return {"status": "success", "message": f"Order {order_id} deleted successfully"}
+    log_order_event("PERMANENT_DELETE", order_id, "Permanently deleted order")
+    return {"status": "success", "message": f"Order {order_id} permanently deleted"}
 
 
 @router.get("/{order_id}/invoice", response_class=HTMLResponse)

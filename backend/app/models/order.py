@@ -45,6 +45,10 @@ class Order(Base):
     delivery_date = Column(String, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(UTC))
 
+    # Trash / Soft Delete
+    is_deleted = Column(Integer, default=0, index=True)
+    deleted_at = Column(DateTime, nullable=True)
+
     # Relationships
     customer = relationship("Customer", back_populates="orders")
     payments = relationship("Payment", back_populates="order", cascade="all, delete-orphan")

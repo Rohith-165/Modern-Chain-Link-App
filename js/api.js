@@ -225,6 +225,156 @@ const API = {
         });
         let merged = Array.from(map.values());
 
+        if (merged.length === 0) {
+            merged = [
+                {
+                    id: 101,
+                    order_id: "MCLC-2026-0001",
+                    orderId: "MCLC-2026-0001",
+                    customer_name: "Ramesh Kumar",
+                    customerName: "Ramesh Kumar",
+                    phone_number: "9876543210",
+                    phoneNumber: "9876543210",
+                    address: "142, Tiruchengode Main Road, Namakkal",
+                    order_type: "Material",
+                    material_type: "Chain Link Fence",
+                    diamond_size: "2 X 2 Inch",
+                    brand: "TATA",
+                    height: 6,
+                    length: 100,
+                    sqft_price: 50,
+                    area: 600,
+                    material_cost: 30000,
+                    barbed_wire: 500,
+                    binding_wire: 200,
+                    total_amount: 30700,
+                    totalAmount: 30700,
+                    amount_paid: 5000,
+                    amountPaid: 5000,
+                    balance_amount: 25700,
+                    balanceAmount: 25700,
+                    status: "Processing",
+                    created_at: new Date(Date.now() - 86400000).toISOString()
+                },
+                {
+                    id: 102,
+                    order_id: "MCLC-2026-0002",
+                    orderId: "MCLC-2026-0002",
+                    customer_name: "Kavitha",
+                    customerName: "Kavitha",
+                    phone_number: "9876543211",
+                    phoneNumber: "9876543211",
+                    address: "55, Sankari Main Road, Erode",
+                    order_type: "Material",
+                    material_type: "Barbed Wire",
+                    diamond_size: "N/A",
+                    brand: "Micon",
+                    height: 5,
+                    length: 150,
+                    sqft_price: 30,
+                    area: 750,
+                    material_cost: 22500,
+                    total_amount: 22500,
+                    totalAmount: 22500,
+                    amount_paid: 22500,
+                    amountPaid: 22500,
+                    balance_amount: 0,
+                    balanceAmount: 0,
+                    status: "Trash",
+                    is_deleted: true,
+                    deleted_at: new Date().toISOString(),
+                    created_at: new Date(Date.now() - 172800000).toISOString()
+                },
+                {
+                    id: 103,
+                    order_id: "MCLC-2026-0003",
+                    orderId: "MCLC-2026-0003",
+                    customer_name: "Santhosh Kumar",
+                    customerName: "Santhosh Kumar",
+                    phone_number: "9876543212",
+                    phoneNumber: "9876543212",
+                    address: "88, Salem Bypass Road, Tiruchengode",
+                    order_type: "Installation",
+                    material_type: "15mm PVC W.mesh",
+                    diamond_size: "1.5 X 1.5 Inch",
+                    brand: "Micon",
+                    height: 5,
+                    length: 80,
+                    sqft_price: 65,
+                    area: 400,
+                    material_cost: 5200,
+                    labour: 1500,
+                    travel: 800,
+                    total_amount: 7500,
+                    totalAmount: 7500,
+                    amount_paid: 2000,
+                    amountPaid: 2000,
+                    balance_amount: 5500,
+                    balanceAmount: 5500,
+                    status: "Trash",
+                    is_deleted: true,
+                    deleted_at: new Date().toISOString(),
+                    created_at: new Date(Date.now() - 259200000).toISOString()
+                },
+                {
+                    id: 104,
+                    order_id: "MCLC-2026-0004",
+                    orderId: "MCLC-2026-0004",
+                    customer_name: "Murugan",
+                    customerName: "Murugan",
+                    phone_number: "9876543213",
+                    phoneNumber: "9876543213",
+                    address: "12, Velur Road, Paramathi Velur",
+                    order_type: "Material",
+                    material_type: "Chain Link Fence",
+                    diamond_size: "2 X 2 Inch",
+                    brand: "TATA",
+                    height: 5,
+                    length: 120,
+                    sqft_price: 48,
+                    area: 600,
+                    material_cost: 28800,
+                    total_amount: 28800,
+                    totalAmount: 28800,
+                    amount_paid: 28800,
+                    amountPaid: 28800,
+                    balance_amount: 0,
+                    balanceAmount: 0,
+                    status: "Delivered",
+                    created_at: new Date(Date.now() - 345600000).toISOString()
+                },
+                {
+                    id: 105,
+                    order_id: "MCLC-2026-0005",
+                    orderId: "MCLC-2026-0005",
+                    customer_name: "Selvam",
+                    customerName: "Selvam",
+                    phone_number: "9876543214",
+                    phoneNumber: "9876543214",
+                    address: "99, Karur Bypass Road, Namakkal",
+                    order_type: "Installation",
+                    material_type: "Chain Link Fence",
+                    diamond_size: "2 X 2 Inch",
+                    brand: "TATA",
+                    height: 6,
+                    length: 200,
+                    sqft_price: 55,
+                    area: 1200,
+                    material_cost: 11000,
+                    labour: 3500,
+                    travel: 1200,
+                    total_amount: 15700,
+                    totalAmount: 15700,
+                    amount_paid: 5000,
+                    amountPaid: 5000,
+                    balance_amount: 10700,
+                    balanceAmount: 10700,
+                    status: "Pending",
+                    created_at: new Date(Date.now() - 432000000).toISOString()
+                }
+            ];
+        }
+
         // One-time migration: auto-trash order 0002 and 0003 if present in active state
         const trashedTargetIds = ["0002", "0003", "MCLC-2026-0002", "MCLC-2026-0003", "ORD-0002", "ORD-0003"];
         let modified = false;
@@ -515,7 +665,11 @@ const API = {
 
         let orders = this.getStoredOrders();
         const year = new Date().getFullYear();
-        const generatedId = `MCLC-${year}-${String(orders.length + 1).padStart(4, '0')}`;
+        const maxSeq = orders.reduce((max, o) => {
+            const match = (o.order_id || o.orderId || "").match(/MCLC-\d{4}-(\d+)/);
+            return match ? Math.max(max, parseInt(match[1], 10)) : max;
+        }, 0);
+        const generatedId = (res && (res.order_id || res.orderId)) ? (res.order_id || res.orderId) : `MCLC-${year}-${String(maxSeq + 1).padStart(4, '0')}`;
 
         const createdOrder = {
             id: Date.now(),

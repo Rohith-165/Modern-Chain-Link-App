@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const calculationFields = [
         "height", "length", "sqftPrice", "barbedWireKg", "barbedWireRate",
         "bindingWireKg", "bindingWireRate", "barbedWire", "bindingWire",
-        "labour", "travel", "stone"
+        "labour", "travel", "stone", "amountPaid"
     ];
 
     calculationFields.forEach(function (id) {

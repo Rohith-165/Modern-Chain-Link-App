@@ -438,7 +438,7 @@ const API = {
         }
 
         try {
-            await this.request(`/orders/${orderId}`, { method: "DELETE" }, () => null);
+            await this.request(`/orders/${orderId}/trash`, { method: "POST" }, () => null);
         } catch (e) {}
 
         let orders = this.getStoredOrders();
@@ -453,6 +453,10 @@ const API = {
     },
 
     async restoreOrder(orderId) {
+        try {
+            await this.request(`/orders/${orderId}/restore`, { method: "POST" }, () => null);
+        } catch (e) {}
+
         let orders = this.getStoredOrders();
         const idx = orders.findIndex(o => (o.order_id || o.orderId) === orderId);
         if (idx !== -1) {
@@ -470,7 +474,7 @@ const API = {
         }
 
         try {
-            await this.request(`/orders/${orderId}`, { method: "DELETE" }, () => null);
+            await this.request(`/orders/${orderId}/permanent`, { method: "DELETE" }, () => null);
         } catch (e) {}
 
         let orders = this.getStoredOrders();
@@ -485,12 +489,9 @@ const API = {
         try {
             let combined = this.getStoredOrders();
 
+            // Always fetch complete order list from server without status filter so cross-device updates sync 100%
             try {
-                const params = new URLSearchParams();
-                if (status && status !== "All" && status !== "Trash") params.append("status", status);
-                if (search) params.append("search", search);
-                const query = params.toString() ? `?${params.toString()}` : "";
-                const serverOrders = await this.request(`/orders${query}`, { method: "GET" }, () => null);
+                const serverOrders = await this.request('/orders', { method: "GET" }, () => null);
 
                 if (Array.isArray(serverOrders) && serverOrders.length > 0) {
                     let map = new Map();
@@ -868,5 +869,17 @@ const API = {
         localStorage.setItem("stockCleared", "true");
         localStorage.setItem("stockItems", JSON.stringify([]));
         return { status: "ok" };
+    },
+
+    startAutoSync(callback = null, intervalMs = 10000) {
+        if (this._syncTimer) clearInterval(this._syncTimer);
+        this._syncTimer = setInterval(async () => {
+            try {
+                await this.getOrders();
+                if (typeof callback === "function") {
+                    callback();
+                }
+            } catch (e) {}
+        }, intervalMs);
     }
 };

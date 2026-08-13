@@ -21,6 +21,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     loadOrders();
+    API.startAutoSync(loadOrders, 10000);
 });
 
 async function loadOrders() {

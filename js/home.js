@@ -26,6 +26,7 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("currentDate").textContent = today.toLocaleDateString("en-IN", options);
 
     loadDashboardStats();
+    API.startAutoSync(loadDashboardStats, 10000);
 });
 
 async function loadDashboardStats() {

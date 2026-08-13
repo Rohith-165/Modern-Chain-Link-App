@@ -23,24 +23,6 @@ async function loadStockData() {
     UI.showLoader("Loading stock inventory...");
     try {
         allStockItems = await API.getStock();
-
-        if (!allStockItems || allStockItems.length === 0) {
-            const defaultItems = [
-                { item_name: "TATA GI Wire Chain Link Fence 6ft", category: "Chain Link Fence", diamond_size: "2 X 2 Inch", brand: "TATA GI Wire", height: "6", length_ft: "100", shop_quantity: 50, factory_quantity: 150, location_place: "Both", unit: "Rolls", notes: "Standard 6ft Chain Link Fence" },
-                { item_name: "TATA GI Barbed Wire 50kg", category: "Barbed Wire", diamond_size: "N/A", brand: "TATA GI Wire", height: "N/A", length_ft: "50", shop_quantity: 200, factory_quantity: 800, location_place: "Both", unit: "Kg", notes: "50kg Barbed Wire Bundle" },
-                { item_name: "Micon Wire 15mm PVC W.mesh 5ft", category: "15mm PVC W.mesh", diamond_size: "1.5 X 1.5 Inch", brand: "Micon Wire", height: "5", length_ft: "100", shop_quantity: 30, factory_quantity: 70, location_place: "Both", unit: "Rolls", notes: "Green PVC Coated Mesh" },
-                { item_name: "Local Quality Binding Wire 25kg", category: "Binding Wire", diamond_size: "N/A", brand: "Local Quality", height: "N/A", length_ft: "25", shop_quantity: 100, factory_quantity: 400, location_place: "Both", unit: "Kg", notes: "Binding Wire for Fencing Installation" },
-                { item_name: "Cement Fencing Poles 8ft", category: "Poles", diamond_size: "N/A", brand: "Local Quality", height: "8", length_ft: "Count (Pcs)", shop_quantity: 40, factory_quantity: 200, location_place: "Both", unit: "Pieces", notes: "8ft Reinforced Cement Poles" }
-            ];
-
-            for (const item of defaultItems) {
-                try {
-                    await API.createStockItem(item);
-                } catch (e) {}
-            }
-            allStockItems = await API.getStock();
-        }
-
         UI.hideLoader();
         updateSummaryKPIs();
         renderStockTable();

@@ -24,6 +24,9 @@
             <p>Track customer profiles, lifetime value, and order records</p>
         </div>
         <div class="flexGap">
+            <button type="button" onclick="downloadCustomersPDF()" class="btn-primary btn-sm" style="background: #dc2626; border: none; color: white;">
+                <i class="fa-solid fa-file-pdf"></i> Download PDF
+            </button>
             <button type="button" onclick="exportCustomersToExcel()" class="btn-primary btn-sm" style="background: #16a34a; border: none; color: white;">
                 <i class="fa-solid fa-file-excel"></i> Export Excel
             </button>
@@ -40,6 +43,9 @@
                 <i class="fa-solid fa-magnifying-glass searchIcon"></i>
                 <input type="text" id="customerSearchInput" placeholder="Search by Customer Name or Phone Number..." class="searchInput">
             </div>
+            <button type="button" onclick="downloadCustomersPDF()" class="btn-sm primaryBtn" style="background: #dc2626; white-space: nowrap;">
+                <i class="fa-solid fa-file-pdf"></i> PDF
+            </button>
             <button type="button" onclick="exportCustomersToExcel()" class="btn-sm primaryBtn" style="background: #16a34a; white-space: nowrap;">
                 <i class="fa-solid fa-file-excel"></i> Excel
             </button>

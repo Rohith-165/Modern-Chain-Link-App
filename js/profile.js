@@ -84,3 +84,27 @@ async function importData() {
         UI.error("Failed to parse JSON backup string.");
     }
 }
+
+async function clearAllSystemData() {
+    const passcode = prompt("Enter Master Security Password to wipe all Orders & Stock for a fresh start:");
+    if (!passcode) return;
+
+    if (!API.validatePasscode(passcode)) {
+        UI.error("Invalid password. Action unauthorized.");
+        return;
+    }
+
+    const confirmWipe = confirm("⚠️ WARNING: This will permanently delete ALL orders and ALL stock items across the system. Are you sure you want to start fresh from now on?");
+    if (!confirmWipe) return;
+
+    try {
+        await API.clearAllOrders(passcode);
+        await API.clearAllStock(passcode);
+        UI.success("All Orders and Stock wiped clean! System reset for fresh start.");
+        setTimeout(() => {
+            window.location.href = "home.html";
+        }, 800);
+    } catch (err) {
+        UI.error("Failed to clear data: " + err.message);
+    }
+}

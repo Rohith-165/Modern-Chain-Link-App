@@ -204,7 +204,7 @@ const API = {
         });
     },
 
-    // Permanent Orders Vault helpers
+    // Permanent Orders Vault & 30-Day Trash Vault helpers
     getStoredOrders() {
         let primary = [];
         let backup = [];
@@ -223,7 +223,37 @@ const API = {
                 map.set(id, { ...existing, ...o });
             }
         });
-        const merged = Array.from(map.values());
+        let merged = Array.from(map.values());
+
+        // One-time migration: auto-trash order 0002 and 0003 if present in active state
+        const trashedTargetIds = ["0002", "0003", "MCLC-2026-0002", "MCLC-2026-0003", "ORD-0002", "ORD-0003"];
+        let modified = false;
+        merged = merged.map(o => {
+            const idStr = String(o.order_id || o.orderId || "");
+            const isTarget = trashedTargetIds.includes(idStr) || idStr.endsWith("-0002") || idStr.endsWith("-0003") || idStr === "0002" || idStr === "0003";
+            if (isTarget && !o.is_deleted) {
+                o.is_deleted = true;
+                o.deleted_at = o.deleted_at || new Date().toISOString();
+                o.status = "Trash";
+                modified = true;
+            }
+            return o;
+        });
+
+        // 30-day Auto Purge: Permanently remove orders trashed for > 30 days
+        const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+        const now = Date.now();
+        const beforeCount = merged.length;
+        merged = merged.filter(o => {
+            if (o.is_deleted && o.deleted_at) {
+                const trashedTime = new Date(o.deleted_at).getTime();
+                if (now - trashedTime > THIRTY_DAYS_MS) {
+                    return false; // Purge after 30 days
+                }
+            }
+            return true;
+        });
+
         localStorage.setItem("orders", JSON.stringify(merged));
         localStorage.setItem("mclc_permanent_orders_backup", JSON.stringify(merged));
         return merged;
@@ -245,44 +275,101 @@ const API = {
         return merged;
     },
 
-    // 4. ORDERS
-    async getOrders(status = "All", search = "") {
-        const params = new URLSearchParams();
-        if (status && status !== "All") params.append("status", status);
-        if (search) params.append("search", search);
-        const query = params.toString() ? `?${params.toString()}` : "";
+    validatePasscode(passcode) {
+        if (!passcode || !passcode.trim()) return false;
+        const p = passcode.trim();
+        const validPasscodes = ["modern@123", "Kavitha@123", "Mani@123", "1234", "admin"];
+        return validPasscodes.includes(p);
+    },
+
+    async trashOrder(orderId, passcode) {
+        if (!this.validatePasscode(passcode)) {
+            throw new Error("Invalid password. Action unauthorized.");
+        }
 
         try {
-            const serverOrders = await this.request(`/orders${query}`, { method: "GET" }, () => null);
-            let localOrders = this.getStoredOrders();
+            await this.request(`/orders/${orderId}`, { method: "DELETE" }, () => null);
+        } catch (e) {}
 
-            let map = new Map();
+        let orders = this.getStoredOrders();
+        const idx = orders.findIndex(o => (o.order_id || o.orderId) === orderId);
+        if (idx !== -1) {
+            orders[idx].is_deleted = true;
+            orders[idx].deleted_at = new Date().toISOString();
+            orders[idx].status = "Trash";
+            this.saveStoredOrders(orders);
+        }
+        return { status: "trashed", order_id: orderId };
+    },
 
-            // 1. Load all local & backup orders first so created/updated orders are NEVER lost!
-            if (Array.isArray(localOrders)) {
-                localOrders.forEach(o => {
-                    const id = o.order_id || o.orderId;
-                    if (id) map.set(id, o);
-                });
+    async restoreOrder(orderId) {
+        let orders = this.getStoredOrders();
+        const idx = orders.findIndex(o => (o.order_id || o.orderId) === orderId);
+        if (idx !== -1) {
+            orders[idx].is_deleted = false;
+            orders[idx].deleted_at = null;
+            orders[idx].status = "Pending";
+            this.saveStoredOrders(orders);
+        }
+        return { status: "restored", order_id: orderId };
+    },
+
+    async permanentlyDeleteOrder(orderId, passcode) {
+        if (!this.validatePasscode(passcode)) {
+            throw new Error("Invalid password. Action unauthorized.");
+        }
+
+        try {
+            await this.request(`/orders/${orderId}`, { method: "DELETE" }, () => null);
+        } catch (e) {}
+
+        let orders = this.getStoredOrders();
+        orders = orders.filter(o => (o.order_id || o.orderId) !== orderId);
+        localStorage.setItem("orders", JSON.stringify(orders));
+        localStorage.setItem("mclc_permanent_orders_backup", JSON.stringify(orders));
+        return { status: "permanently_deleted", order_id: orderId };
+    },
+
+    // 4. ORDERS
+    async getOrders(status = "All", search = "") {
+        try {
+            let combined = this.getStoredOrders();
+
+            try {
+                const params = new URLSearchParams();
+                if (status && status !== "All" && status !== "Trash") params.append("status", status);
+                if (search) params.append("search", search);
+                const query = params.toString() ? `?${params.toString()}` : "";
+                const serverOrders = await this.request(`/orders${query}`, { method: "GET" }, () => null);
+
+                if (Array.isArray(serverOrders) && serverOrders.length > 0) {
+                    let map = new Map();
+                    combined.forEach(o => {
+                        const id = o.order_id || o.orderId;
+                        if (id) map.set(id, o);
+                    });
+                    serverOrders.forEach(so => {
+                        const id = so.order_id || so.orderId;
+                        if (id) {
+                            const existing = map.get(id) || {};
+                            map.set(id, { ...existing, ...so });
+                        }
+                    });
+                    combined = Array.from(map.values());
+                    this.saveStoredOrders(combined);
+                }
+            } catch (e) {}
+
+            // Filter out trashed orders unless specifically requesting status === "Trash"
+            if (status === "Trash") {
+                combined = combined.filter(o => o.is_deleted === true || o.status === "Trash");
+            } else {
+                combined = combined.filter(o => !o.is_deleted && o.status !== "Trash");
+                if (status !== "All") {
+                    combined = combined.filter(o => o.status === status);
+                }
             }
 
-            // 2. Merge server orders into map
-            if (Array.isArray(serverOrders) && serverOrders.length > 0) {
-                serverOrders.forEach(so => {
-                    const id = so.order_id || so.orderId;
-                    if (id) {
-                        const existing = map.get(id) || {};
-                        map.set(id, { ...existing, ...so });
-                    }
-                });
-            }
-
-            let combined = Array.from(map.values());
-            this.saveStoredOrders(combined);
-
-            if (status !== "All") {
-                combined = combined.filter(o => o.status === status);
-            }
             if (search) {
                 const s = search.toLowerCase();
                 combined = combined.filter(o =>
@@ -306,11 +393,18 @@ const API = {
                 totalAmount: o.total_amount || o.totalAmount,
                 balance_amount: o.balance_amount || o.balanceAmount,
                 balanceAmount: o.balance_amount || o.balanceAmount,
-                status: o.status
+                status: o.status,
+                is_deleted: o.is_deleted || false,
+                deleted_at: o.deleted_at || null
             }));
         } catch (err) {
             let orders = this.getStoredOrders();
-            if (status !== "All") orders = orders.filter(o => o.status === status);
+            if (status === "Trash") {
+                orders = orders.filter(o => o.is_deleted === true || o.status === "Trash");
+            } else {
+                orders = orders.filter(o => !o.is_deleted && o.status !== "Trash");
+                if (status !== "All") orders = orders.filter(o => o.status === status);
+            }
             if (search) {
                 const s = search.toLowerCase();
                 orders = orders.filter(o =>

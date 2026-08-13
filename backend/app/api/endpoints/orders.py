@@ -66,11 +66,12 @@ def update_order(
     return order
 
 @router.delete("/{order_id}")
-def delete_order(order_id: str):
-    raise HTTPException(
-        status_code=status.HTTP_403_FORBIDDEN,
-        detail="Order deletion is disabled. Orders cannot be deleted once created."
-    )
+def delete_order(order_id: str, db: Session = Depends(get_db)):
+    success = order_service.delete_order(db, order_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Order not found")
+    return {"status": "success", "message": f"Order {order_id} deleted successfully"}
+
 
 @router.get("/{order_id}/invoice", response_class=HTMLResponse)
 def get_order_invoice_html(

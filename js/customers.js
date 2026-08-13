@@ -84,9 +84,14 @@ async function renderCustomers() {
                 </div>
 
                 <div id="customerDetails-${idx}" class="customerOrdersList mt10" style="display: none;">
-                    <h4 class="mt10 mb10" style="font-size: 14px; border-bottom: 1px solid var(--border-color); padding-bottom: 6px;">
-                        <i class="fa-solid fa-clock-rotate-left color-primary"></i> Order History (${customerOrders.length})
-                    </h4>
+                    <div class="flexBetween mt10 mb10" style="border-bottom: 1px solid var(--border-color); padding-bottom: 6px;">
+                        <h4 style="font-size: 14px; margin: 0;">
+                            <i class="fa-solid fa-clock-rotate-left color-primary"></i> Order History (${customerOrders.length})
+                        </h4>
+                        <button class="btn-primary btn-sm" style="background: #2563eb; color: white; border: none; padding: 6px 12px; border-radius: var(--radius-md);" onclick="downloadSingleCustomerPDF(${idx})">
+                            <i class="fa-solid fa-file-pdf"></i> Download PDF Statement
+                        </button>
+                    </div>
                     ${customerOrders.map(order => `
                         <div class="flexBetween mb10 p10" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px;">
                             <div>
@@ -188,5 +193,155 @@ async function exportCustomersToExcel() {
     } catch (err) {
         UI.hideLoader();
         UI.error("Failed to export customers: " + err.message);
+    }
+}
+
+async function downloadSingleCustomerPDF(idx) {
+    try {
+        const searchText = document.getElementById("customerSearchInput") ? document.getElementById("customerSearchInput").value.trim() : "";
+        const customers = await API.getCustomers(searchText);
+
+        const customer = customers[idx];
+        if (!customer) {
+            UI.error("Customer record not found.");
+            return;
+        }
+
+        const name = customer.name || customer.customerName || "Customer";
+        const phone = customer.phone_number || customer.phoneNumber || "N/A";
+        const address = customer.address || "N/A";
+        const totalSpent = Number(customer.total_spent || 0);
+        const totalPaid = Number(customer.total_paid || 0);
+        const balanceDue = Number(customer.balance_due || 0);
+        const orders = customer.orders || [];
+
+        const printWindow = window.open("", "_blank", "width=850,height=1100");
+        if (!printWindow) {
+            UI.error("Pop-up window blocked. Please allow pop-ups to download PDF.");
+            return;
+        }
+
+        const ordersRows = orders.map((o, i) => `
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">${i + 1}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd; font-weight: bold;">${o.order_id || o.orderId}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${new Date(o.created_at || o.createdAt || Date.now()).toLocaleDateString("en-IN")}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${o.order_type || o.orderType || 'Material'}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">₹${Number(o.total_amount || o.totalAmount || 0).toLocaleString("en-IN")}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right; color: #16a34a; font-weight: 600;">₹${Number(o.amount_paid || o.amountPaid || 0).toLocaleString("en-IN")}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right; color: ${(o.balance_amount || o.balanceAmount) > 0 ? '#dc2626' : '#16a34a'}; font-weight: 600;">₹${Number(o.balance_amount || o.balanceAmount || 0).toLocaleString("en-IN")}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;"><span style="padding: 3px 8px; border-radius: 4px; font-size: 11px; background: #e0f2fe; color: #0369a1; font-weight: bold;">${o.status}</span></td>
+            </tr>
+        `).join("");
+
+        const htmlContent = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Customer Statement - ${name}</title>
+                <style>
+                    @page { size: A4; margin: 15mm; }
+                    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e293b; padding: 20px; }
+                    .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0284c7; padding-bottom: 15px; margin-bottom: 20px; }
+                    .company-title { font-size: 24px; font-weight: bold; color: #0284c7; margin: 0; }
+                    .subtitle { font-size: 12px; color: #64748b; margin-top: 4px; }
+                    .statement-badge { background: #0284c7; color: white; padding: 6px 14px; border-radius: 6px; font-size: 14px; font-weight: bold; }
+                    .card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 20px; }
+                    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+                    .stats-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+                    .stat-box { background: #fff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px; text-align: center; }
+                    .stat-box small { color: #64748b; font-size: 11px; display: block; text-transform: uppercase; }
+                    .stat-box strong { font-size: 16px; margin-top: 4px; display: block; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+                    th { background: #0284c7; color: white; padding: 10px 8px; font-weight: 600; text-align: left; }
+                    th.num { text-align: right; }
+                    .footer { margin-top: 40px; border-top: 1px solid #e2e8f0; padding-top: 15px; display: flex; justify-content: space-between; font-size: 12px; color: #64748b; }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <div>
+                        <h1 class="company-title">MODERN CHAIN LINK COMPANY</h1>
+                        <p class="subtitle">Premium Fencing Solutions | Tiruchengode, Tamil Nadu | Ph: 9876543210</p>
+                    </div>
+                    <div class="statement-badge">CUSTOMER STATEMENT</div>
+                </div>
+
+                <div class="card">
+                    <h3 style="margin-top: 0; color: #0f172a; font-size: 16px; border-bottom: 1px dashed #cbd5e1; padding-bottom: 8px;">Customer Profile Details</h3>
+                    <div class="grid-2" style="font-size: 14px; margin-top: 10px;">
+                        <div>
+                            <p style="margin: 4px 0;"><strong>Customer Name:</strong> ${name}</p>
+                            <p style="margin: 4px 0;"><strong>Phone Number:</strong> ${phone}</p>
+                        </div>
+                        <div>
+                            <p style="margin: 4px 0;"><strong>Delivery Address:</strong> ${address}</p>
+                            <p style="margin: 4px 0;"><strong>Statement Generated Date:</strong> ${new Date().toLocaleDateString("en-IN")}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-container">
+                    <div class="stat-box">
+                        <small>Total Orders</small>
+                        <strong style="color: #0284c7;">${orders.length}</strong>
+                    </div>
+                    <div class="stat-box">
+                        <small>Total Spent</small>
+                        <strong style="color: #0f172a;">₹${totalSpent.toLocaleString("en-IN")}</strong>
+                    </div>
+                    <div class="stat-box">
+                        <small>Total Paid</small>
+                        <strong style="color: #16a34a;">₹${totalPaid.toLocaleString("en-IN")}</strong>
+                    </div>
+                    <div class="stat-box">
+                        <small>Balance Outstanding</small>
+                        <strong style="color: ${balanceDue > 0 ? '#dc2626' : '#16a34a'};">₹${balanceDue.toLocaleString("en-IN")}</strong>
+                    </div>
+                </div>
+
+                <h3 style="color: #0f172a; font-size: 15px; margin-bottom: 5px;">Itemized Order History</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 40px; text-align: center;">S.No</th>
+                            <th>Order ID</th>
+                            <th>Date</th>
+                            <th>Order Type</th>
+                            <th class="num">Total Amount</th>
+                            <th class="num">Paid</th>
+                            <th class="num">Balance Due</th>
+                            <th style="text-align: center;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${ordersRows || '<tr><td colspan="8" style="text-align:center; padding: 20px; color: #94a3b8;">No orders recorded for this customer.</td></tr>'}
+                    </tbody>
+                </table>
+
+                <div class="footer">
+                    <div>
+                        <p style="margin:0;">Thank you for trusting <strong>Modern Chain Link Company</strong>.</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <p style="margin:0;">Authorized Signature & Seal</p>
+                    </div>
+                </div>
+
+                <script>
+                    window.onload = function() {
+                        window.print();
+                    };
+                </script>
+            </body>
+            </html>
+        `;
+
+        printWindow.document.open();
+        printWindow.document.write(htmlContent);
+        printWindow.document.close();
+        UI.success(`Customer Statement PDF generated for ${name}!`);
+    } catch (err) {
+        UI.error("Failed to generate Customer PDF: " + err.message);
     }
 }

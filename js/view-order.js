@@ -221,11 +221,14 @@ function calculateAmounts() {
     const travel = Number(document.getElementById("travel").value) || 0;
     const stone = Number(document.getElementById("stone").value) || 0;
 
-    let amountPaid = Number(currentOrder ? (currentOrder.amount_paid || currentOrder.amountPaid || 0) : 0);
-    if (currentOrder && currentOrder.payments && currentOrder.payments.length > 0) {
-        amountPaid = currentOrder.payments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+    let amountPaid = Number(document.getElementById("amountPaid").value);
+    if (isNaN(amountPaid) || amountPaid < 0) {
+        amountPaid = Number(currentOrder ? (currentOrder.amount_paid || currentOrder.amountPaid || 0) : 0);
+        if (currentOrder && currentOrder.payments && currentOrder.payments.length > 0) {
+            amountPaid = currentOrder.payments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+        }
+        document.getElementById("amountPaid").value = amountPaid;
     }
-    document.getElementById("amountPaid").value = amountPaid;
 
     const totalAmount = materialCost + barbedWireCost + bindingWireCost + labour + travel + stone;
     const balanceAmount = Math.max(0, totalAmount - amountPaid);
@@ -400,5 +403,42 @@ async function updateOrder(event) {
     } catch (err) {
         UI.hideLoader();
         UI.error("Failed to update order: " + err.message);
+    }
+}
+
+function openViewOrderDeleteModal() {
+    const modal = document.getElementById("viewDeletePasswordModal");
+    const inputEl = document.getElementById("viewDeletePasscodeInput");
+    const errorEl = document.getElementById("viewDeleteError");
+
+    if (inputEl) inputEl.value = "";
+    if (errorEl) errorEl.textContent = "";
+    if (modal) modal.style.display = "flex";
+}
+
+function closeViewDeleteModal() {
+    const modal = document.getElementById("viewDeletePasswordModal");
+    if (modal) modal.style.display = "none";
+}
+
+async function confirmViewOrderDelete() {
+    const inputEl = document.getElementById("viewDeletePasscodeInput");
+    const errorEl = document.getElementById("viewDeleteError");
+    const passcode = inputEl ? inputEl.value.trim() : "";
+
+    if (!passcode) {
+        if (errorEl) errorEl.textContent = "Please enter your password.";
+        return;
+    }
+
+    try {
+        await API.trashOrder(currentOrderId, passcode);
+        UI.success(`Order ${currentOrderId} moved to Trash Vault (kept for 30 days).`);
+        closeViewDeleteModal();
+        setTimeout(() => {
+            window.location.href = "orders.html";
+        }, 500);
+    } catch (err) {
+        if (errorEl) errorEl.textContent = err.message || "Invalid password.";
     }
 }

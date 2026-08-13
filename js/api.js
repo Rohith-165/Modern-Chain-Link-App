@@ -216,12 +216,12 @@ const API = {
         } catch (e) {}
 
         const map = new Map();
-        [...backup, ...primary].forEach(o => {
-            const id = o.order_id || o.orderId;
-            if (id) {
-                const existing = map.get(id) || {};
-                map.set(id, { ...existing, ...o });
-            }
+        [...backup, ...primary].forEach((o, idx) => {
+            const id = o.order_id || o.orderId || (o.id ? String(o.id) : `MCLC-${new Date().getFullYear()}-${String(idx + 1).padStart(4, '0')}`);
+            o.order_id = id;
+            o.orderId = id;
+            const existing = map.get(id) || {};
+            map.set(id, { ...existing, ...o });
         });
         let merged = Array.from(map.values());
 
@@ -251,12 +251,12 @@ const API = {
             currentBackup = [...pBackup, ...currentBackup];
         } catch (e) {}
 
-        [...currentBackup, ...(ordersList || [])].forEach(o => {
-            const id = o.order_id || o.orderId;
-            if (id) {
-                const existing = map.get(id) || {};
-                map.set(id, { ...existing, ...o });
-            }
+        [...currentBackup, ...(ordersList || [])].forEach((o, idx) => {
+            const id = o.order_id || o.orderId || (o.id ? String(o.id) : `MCLC-${new Date().getFullYear()}-${String(idx + 1).padStart(4, '0')}`);
+            o.order_id = id;
+            o.orderId = id;
+            const existing = map.get(id) || {};
+            map.set(id, { ...existing, ...o });
         });
         const merged = Array.from(map.values());
         if (merged.length > 0) {
@@ -517,10 +517,10 @@ const API = {
 
         const createdOrder = {
             id: Date.now(),
-            order_id: generatedId,
-            orderId: generatedId,
             ...orderPayload,
             ...(res || {}),
+            order_id: generatedId,
+            orderId: generatedId,
             created_at: (res && res.created_at) ? res.created_at : new Date().toISOString(),
             payments: (res && res.payments && res.payments.length > 0) ? res.payments : (orderPayload.amount_paid > 0 ? [{
                 id: 1,

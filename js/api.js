@@ -225,51 +225,33 @@ const API = {
         });
         let merged = Array.from(map.values());
 
-        // If orders exist, reset cleared flag; otherwise if explicitly cleared, return empty array
         if (merged.length > 0) {
             localStorage.removeItem("ordersCleared");
-        } else if (localStorage.getItem("ordersCleared") === "true") {
+            return merged;
+        }
+
+        if (localStorage.getItem("ordersCleared") === "true") {
             return [];
         }
 
-        // One-time migration: auto-trash order 0002 and 0003 if present in active state
-        const trashedTargetIds = ["0002", "0003", "MCLC-2026-0002", "MCLC-2026-0003", "ORD-0002", "ORD-0003"];
-        let modified = false;
-        merged = merged.map(o => {
-            const idStr = String(o.order_id || o.orderId || "");
-            const isTarget = trashedTargetIds.includes(idStr) || idStr.endsWith("-0002") || idStr.endsWith("-0003") || idStr === "0002" || idStr === "0003";
-            if (isTarget && !o.is_deleted) {
-                o.is_deleted = true;
-                o.deleted_at = o.deleted_at || new Date().toISOString();
-                o.status = "Trash";
-                modified = true;
-            }
-            return o;
-        });
-
-        // 30-day Auto Purge: Permanently remove orders trashed for > 30 days
-        const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
-        const now = Date.now();
-        const beforeCount = merged.length;
-        merged = merged.filter(o => {
-            if (o.is_deleted && o.deleted_at) {
-                const trashedTime = new Date(o.deleted_at).getTime();
-                if (now - trashedTime > THIRTY_DAYS_MS) {
-                    return false; // Purge after 30 days
-                }
-            }
-            return true;
-        });
-
-        localStorage.setItem("orders", JSON.stringify(merged));
-        localStorage.setItem("mclc_permanent_orders_backup", JSON.stringify(merged));
         return merged;
     },
 
     saveStoredOrders(ordersList) {
+        if (ordersList && ordersList.length > 0) {
+            localStorage.removeItem("ordersCleared");
+        }
         const map = new Map();
-        const currentBackup = this.getStoredOrders();
-        [...currentBackup, ...ordersList].forEach(o => {
+        let currentBackup = [];
+        try {
+            currentBackup = JSON.parse(localStorage.getItem("orders")) || [];
+        } catch (e) {}
+        try {
+            const pBackup = JSON.parse(localStorage.getItem("mclc_permanent_orders_backup")) || [];
+            currentBackup = [...pBackup, ...currentBackup];
+        } catch (e) {}
+
+        [...currentBackup, ...(ordersList || [])].forEach(o => {
             const id = o.order_id || o.orderId;
             if (id) {
                 const existing = map.get(id) || {};

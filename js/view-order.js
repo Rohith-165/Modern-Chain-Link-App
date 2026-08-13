@@ -233,6 +233,12 @@ function calculateAmounts() {
     const totalAmount = materialCost + barbedWireCost + bindingWireCost + labour + travel + stone;
     const balanceAmount = Math.max(0, totalAmount - amountPaid);
 
+    const initialAdvance = Number(currentOrder ? (currentOrder.amount_paid || currentOrder.amountPaid || 0) : 0);
+    const advanceEl = document.getElementById("displayAdvanceAmount");
+    if (advanceEl) {
+        advanceEl.textContent = "₹" + initialAdvance.toLocaleString("en-IN", { minimumFractionDigits: 2 });
+    }
+
     document.getElementById("area").textContent = area.toFixed(2) + " Sq.ft";
     document.getElementById("materialCost").textContent = "₹" + materialCost.toLocaleString("en-IN", { minimumFractionDigits: 2 });
     document.getElementById("totalAmount").textContent = "₹" + totalAmount.toLocaleString("en-IN", { minimumFractionDigits: 2 });

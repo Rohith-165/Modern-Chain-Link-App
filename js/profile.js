@@ -85,8 +85,8 @@ async function importData() {
     }
 }
 
-async function clearAllSystemData() {
-    const passcode = prompt("Enter Master Security Password to wipe all Orders & Stock for a fresh start:");
+async function clearAllOrdersData() {
+    const passcode = prompt("Enter Master Security Password to wipe ALL Orders:");
     if (!passcode) return;
 
     if (!API.validatePasscode(passcode)) {
@@ -94,17 +94,34 @@ async function clearAllSystemData() {
         return;
     }
 
-    const confirmWipe = confirm("⚠️ WARNING: This will permanently delete ALL orders and ALL stock items across the system. Are you sure you want to start fresh from now on?");
+    const confirmWipe = confirm("⚠️ WARNING: This will permanently delete ALL orders across the system. Are you sure?");
     if (!confirmWipe) return;
 
     try {
         await API.clearAllOrders(passcode);
-        await API.clearAllStock(passcode);
-        UI.success("All Orders and Stock wiped clean! System reset for fresh start.");
-        setTimeout(() => {
-            window.location.href = "home.html";
-        }, 800);
+        UI.success("All Orders wiped clean!");
+        loadDashboardSummary();
     } catch (err) {
-        UI.error("Failed to clear data: " + err.message);
+        UI.error("Failed to clear orders: " + err.message);
+    }
+}
+
+async function clearAllStockData() {
+    const passcode = prompt("Enter Master Security Password to wipe ALL Stocks:");
+    if (!passcode) return;
+
+    if (!API.validatePasscode(passcode)) {
+        UI.error("Invalid password. Action unauthorized.");
+        return;
+    }
+
+    const confirmWipe = confirm("⚠️ WARNING: This will permanently delete ALL stock items across the system. Are you sure?");
+    if (!confirmWipe) return;
+
+    try {
+        await API.clearAllStock(passcode);
+        UI.success("All Stocks wiped clean!");
+    } catch (err) {
+        UI.error("Failed to clear stocks: " + err.message);
     }
 }

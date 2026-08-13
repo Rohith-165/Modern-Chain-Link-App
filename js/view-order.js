@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const calculationFields = [
         "height", "length", "sqftPrice", "barbedWireKg", "barbedWireRate",
         "bindingWireKg", "bindingWireRate", "barbedWire", "bindingWire",
-        "labour", "travel", "stone", "amountPaid"
+        "labour", "travel", "stone", "amountPaid", "additionalPaid"
     ];
 
     calculationFields.forEach(function (id) {
@@ -224,32 +224,26 @@ function calculateAmounts() {
     const travel = Number(document.getElementById("travel").value) || 0;
     const stone = Number(document.getElementById("stone").value) || 0;
 
-    const rawPaidStr = document.getElementById("amountPaid").value;
-    let amountPaid;
-    if (rawPaidStr === "" || rawPaidStr === null || rawPaidStr === undefined) {
-        amountPaid = Number(currentOrder ? (currentOrder.amount_paid || currentOrder.amountPaid || 0) : 0);
-        if (currentOrder && currentOrder.payments && currentOrder.payments.length > 0) {
-            const paySum = currentOrder.payments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
-            if (paySum > amountPaid) amountPaid = paySum;
-        }
-        document.getElementById("amountPaid").value = amountPaid;
+    const rawAdvanceStr = document.getElementById("amountPaid").value;
+    let advanceAmount;
+    if (rawAdvanceStr === "" || rawAdvanceStr === null || rawAdvanceStr === undefined) {
+        advanceAmount = Number(currentOrder ? (currentOrder.amount_paid || currentOrder.amountPaid || 0) : 0);
+        document.getElementById("amountPaid").value = advanceAmount;
     } else {
-        amountPaid = Number(rawPaidStr) || 0;
+        advanceAmount = Number(rawAdvanceStr) || 0;
     }
 
+    const rawAdditionalStr = document.getElementById("additionalPaid") ? document.getElementById("additionalPaid").value : "";
+    let additionalPaid = Number(rawAdditionalStr) || 0;
+
+    const totalPaid = advanceAmount + additionalPaid;
     const totalAmount = materialCost + barbedWireCost + bindingWireCost + labour + travel + stone;
-    const balanceAmount = Math.max(0, totalAmount - amountPaid);
-
-    const initialAdvance = Number(currentOrder ? (currentOrder.amount_paid || currentOrder.amountPaid || 0) : 0);
-    const advanceEl = document.getElementById("displayAdvanceAmount");
-    if (advanceEl) {
-        advanceEl.textContent = "₹" + initialAdvance.toLocaleString("en-IN", { minimumFractionDigits: 2 });
-    }
+    const balanceAmount = Math.max(0, totalAmount - totalPaid);
 
     document.getElementById("area").textContent = area.toFixed(2) + " Sq.ft";
     document.getElementById("materialCost").textContent = "₹" + materialCost.toLocaleString("en-IN", { minimumFractionDigits: 2 });
     document.getElementById("totalAmount").textContent = "₹" + totalAmount.toLocaleString("en-IN", { minimumFractionDigits: 2 });
-    document.getElementById("displayAmountPaid").textContent = "₹" + amountPaid.toLocaleString("en-IN", { minimumFractionDigits: 2 });
+    document.getElementById("displayAmountPaid").textContent = "₹" + totalPaid.toLocaleString("en-IN", { minimumFractionDigits: 2 });
     document.getElementById("balanceAmount").textContent = "₹" + balanceAmount.toLocaleString("en-IN", { minimumFractionDigits: 2 });
 }
 
@@ -275,37 +269,37 @@ function renderPaymentHistory() {
         item.innerHTML = `
             <div>
                 <strong>₹${Number(payment.amount).toLocaleString("en-IN")}</strong>
-                <span class="badge badge-paid" style="margin-left: 8px;">${payment.payment_mode || payment.mode || 'Cash'}</span>
-                <p style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">
-                    <i class="fa-regular fa-clock"></i> ${dateStr} ${payment.notes ? ` &bull; ${payment.notes}` : ''}
-                </p>
+                <small class="text-muted" style="display: block;">${payment.payment_mode || 'Cash/UPI'} ${payment.notes ? '- ' + payment.notes : ''}</small>
             </div>
-            <span class="badge badge-paid"><i class="fa-solid fa-lock"></i> Audited Record</span>
+            <small class="text-muted">${dateStr}</small>
         `;
 
         container.appendChild(item);
     });
 }
 
-async function showAddPaymentModal() {
+function showAddPaymentModal() {
     const amountStr = prompt("Enter payment amount (₹):");
     if (!amountStr) return;
 
     const amount = Number(amountStr);
     if (isNaN(amount) || amount <= 0) {
-        UI.error("Please enter a valid positive payment amount");
+        UI.error("Please enter a valid positive payment amount.");
         return;
     }
 
-    const mode = prompt("Payment mode (e.g., Cash, UPI, GPay, Bank Transfer):", "Cash / UPI") || "Cash";
-    const notes = prompt("Notes (optional):", "Partial payment received") || "";
+    const paymentMode = prompt("Enter payment mode (e.g., Cash, UPI, Bank Transfer):", "UPI") || "Cash/UPI";
+    const notes = prompt("Enter notes (optional):", "") || "";
 
+    recordNewPayment(amount, paymentMode, notes);
+}
+
+async function recordNewPayment(amount, paymentMode, notes) {
     UI.showLoader("Recording Payment...");
-
     try {
         await API.addPayment(currentOrderId, {
             amount: amount,
-            payment_mode: mode,
+            payment_mode: paymentMode,
             notes: notes
         });
 
@@ -379,6 +373,9 @@ async function updateOrder(event) {
         const bindingWireRate = Number(document.getElementById("bindingWireRate").value || 0);
         const bindingWireCost = (bindingWireKg && bindingWireRate) ? (bindingWireKg * bindingWireRate) : Number(document.getElementById("bindingWire").value || 0);
 
+        const advanceVal = Number(document.getElementById("amountPaid").value || 0);
+        const additionalVal = Number(document.getElementById("additionalPaid") ? document.getElementById("additionalPaid").value : 0);
+
         const orderPayload = {
             customer_name: document.getElementById("customerName").value.trim(),
             phone_number: document.getElementById("phoneNumber").value.trim(),
@@ -401,7 +398,7 @@ async function updateOrder(event) {
             labour: Number(document.getElementById("labour").value || 0),
             travel: Number(document.getElementById("travel").value || 0),
             stone: Number(document.getElementById("stone").value || 0),
-            amount_paid: Number(document.getElementById("amountPaid").value || 0),
+            amount_paid: advanceVal + additionalVal,
             status: document.getElementById("status").value
         };
 
